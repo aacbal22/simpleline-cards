@@ -1,0 +1,42 @@
+{
+  "slug": "kjh",
+  "brand_color": "#B0481F",
+  "company_kr": "심플라인",
+  "company_en": "SIMPLELINE.",
+  "company_mark": "(주)",
+  "front": {
+    "name": "김준형",
+    "title": "실장",
+    "dept": "영업팀",
+    "phones": ["010-6258-4792", "031-855-4243"],
+    "email": "jh.kim@simpleline.co.kr",
+    "addresses": [
+      "경기도 양주시 광적면 광적로 368-14",
+      "서울시 성동구 성수이로22길 61, 5층"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "back": {
+    "name": "KIM JUN HYOUNG",
+    "title": "Sales team_Sales Director",
+    "phones": ["+82-10-6258-4792", "+82-31-855-4243"],
+    "email": "jh.kim@simpleline.co.kr",
+    "addresses": [
+      "368-14, Gwangjeok-ro, Gwangjeok-myeon,",
+      "Yangju-si, Gyeonggi-do, Republic of Korea"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "vcard": {
+    "last_name": "Kim",
+    "first_name": "Jun Hyoung",
+    "full_name_kr": "김준형",
+    "org": "(주)심플라인 / SIMPLELINE",
+    "title": "영업팀 실장 (Sales Director)",
+    "cell": "+82-10-6258-4792",
+    "work_tel": "+82-31-855-4243",
+    "email": "jh.kim@simpleline.co.kr",
+    "url": "http://www.simpleline.co.kr",
+    "adr": "서울시 성동구 성수이로22길 61, 5층"
+  }
+}
