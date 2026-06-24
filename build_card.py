@@ -307,6 +307,102 @@ def make_share(data, page_url, out_path):
     canvas.save(out_path)
 
 
+def build_index(base_url):
+    """cards/*.json 전체를 읽어 관리용 명함 갤러리(docs/index.html) 생성."""
+    items = []
+    for jp in sorted(glob.glob(os.path.join(ROOT, "cards", "*.json"))):
+        with open(jp, encoding="utf-8") as fp:
+            dd = json.load(fp)
+        f = dd["front"]
+        items.append({
+            "slug": dd["slug"],
+            "name": f["name"],
+            "title": f.get("title", ""),
+            "dept": f.get("dept", ""),
+            "company": (dd.get("company_mark", "") + dd.get("company_kr", "")).strip(),
+            "url": f"{base_url}/card/{dd['slug']}/",
+        })
+    cards_html = []
+    for it in items:
+        cards_html.append(f"""
+      <div class="card">
+        <a class="qr" href="card/{esc(it['slug'])}/" title="명함 열기">
+          <img src="qr/{esc(it['slug'])}.png" alt="{esc(it['name'])} QR" loading="lazy">
+        </a>
+        <div class="meta">
+          <div class="nm">{esc(it['name'])} <em>{esc(it['title'])}</em></div>
+          <div class="dp">{esc(it['dept'])}</div>
+        </div>
+        <div class="acts">
+          <a class="b prim" href="card/{esc(it['slug'])}/">명함 열기</a>
+          <a class="b" href="qr/{esc(it['slug'])}_share.png" download>카톡 공유이미지</a>
+          <button class="b" data-url="{esc(it['url'])}" onclick="cp(this)">링크 복사</button>
+        </div>
+      </div>""")
+    page = r"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>심플라인 디지털 명함 관리</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--brand:#B0481F;--ink:#1a1a1a;--muted:#6b6b6b;--line:#ececec}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:#f1f0ee;color:var(--ink);padding:24px 16px 48px}
+.wrap{max-width:920px;margin:0 auto}
+header{border-top:4px solid var(--brand);padding:18px 0 16px}
+header h1{font-size:21px;font-weight:800;letter-spacing:-.3px}
+header p{font-size:13px;color:var(--muted);margin-top:4px}
+.count{font-size:12px;color:var(--brand);font-weight:700;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.card .qr{display:block}
+.card .qr img{width:148px;height:148px;border:1px solid var(--line);border-radius:8px;display:block}
+.meta{text-align:center}
+.meta .nm{font-size:16px;font-weight:800}
+.meta .nm em{font-size:12px;font-weight:600;font-style:normal;color:var(--muted);margin-left:3px}
+.meta .dp{font-size:12px;color:var(--muted);margin-top:1px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:100%}
+.b{flex:1;min-width:84px;text-align:center;font-size:12px;font-weight:700;padding:8px 6px;border-radius:9px;
+  border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;text-decoration:none}
+.b.prim{background:var(--brand);color:#fff;border-color:var(--brand)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1}
+footer{text-align:center;font-size:11px;color:#9a9a9a;margin-top:28px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>심플라인 디지털 명함 관리</h1>
+      <p>명함을 누르면 페이지가 열립니다 · QR/링크/공유이미지를 한곳에서 관리</p>
+      <div class="count">총 %%COUNT%%명</div>
+    </header>
+    <div class="grid">%%CARDS%%
+    </div>
+    <footer>SIMPLELINE · GitHub Pages 호스팅 (PC 꺼져도 항상 열림)</footer>
+  </div>
+  <div class="toast" id="toast">링크가 복사되었습니다</div>
+<script>
+  function cp(btn){
+    var u=btn.dataset.url;
+    navigator.clipboard.writeText(u).then(function(){
+      var t=document.getElementById('toast');t.classList.add('on');
+      setTimeout(function(){t.classList.remove('on')},1500);
+    });
+  }
+</script>
+</body>
+</html>
+"""
+    page = page.replace("%%COUNT%%", str(len(items))).replace("%%CARDS%%", "".join(cards_html))
+    with open(os.path.join(ROOT, "docs", "index.html"), "w", encoding="utf-8") as fp:
+        fp.write(page)
+    print(f"[INDEX] docs/index.html ({len(items)}명)  →  {base_url}/")
+
+
 def process(json_path, base_url):
     with open(json_path, encoding="utf-8") as fp:
         data = json.load(fp)
@@ -337,8 +433,10 @@ def main():
         files.extend(glob.glob(pat))
     if not files:
         print("입력 JSON을 찾지 못함:", args.inputs); sys.exit(1)
+    base = args.base_url.rstrip("/")
     for jp in files:
-        process(jp, args.base_url.rstrip("/"))
+        process(jp, base)
+    build_index(base)  # 명함 추가/수정 시 관리 갤러리도 항상 갱신
 
 
 if __name__ == "__main__":

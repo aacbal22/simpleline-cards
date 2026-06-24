@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>심플라인 디지털 명함 관리</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--brand:#B0481F;--ink:#1a1a1a;--muted:#6b6b6b;--line:#ececec}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:#f1f0ee;color:var(--ink);padding:24px 16px 48px}
+.wrap{max-width:920px;margin:0 auto}
+header{border-top:4px solid var(--brand);padding:18px 0 16px}
+header h1{font-size:21px;font-weight:800;letter-spacing:-.3px}
+header p{font-size:13px;color:var(--muted);margin-top:4px}
+.count{font-size:12px;color:var(--brand);font-weight:700;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
+.card .qr{display:block}
+.card .qr img{width:148px;height:148px;border:1px solid var(--line);border-radius:8px;display:block}
+.meta{text-align:center}
+.meta .nm{font-size:16px;font-weight:800}
+.meta .nm em{font-size:12px;font-weight:600;font-style:normal;color:var(--muted);margin-left:3px}
+.meta .dp{font-size:12px;color:var(--muted);margin-top:1px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:100%}
+.b{flex:1;min-width:84px;text-align:center;font-size:12px;font-weight:700;padding:8px 6px;border-radius:9px;
+  border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;text-decoration:none}
+.b.prim{background:var(--brand);color:#fff;border-color:var(--brand)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:10px 18px;border-radius:999px;font-size:13px;opacity:0;transition:.2s;pointer-events:none}
+.toast.on{opacity:1}
+footer{text-align:center;font-size:11px;color:#9a9a9a;margin-top:28px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>심플라인 디지털 명함 관리</h1>
+      <p>명함을 누르면 페이지가 열립니다 · QR/링크/공유이미지를 한곳에서 관리</p>
+      <div class="count">총 2명</div>
+    </header>
+    <div class="grid">
+      <div class="card">
+        <a class="qr" href="card/cem/" title="명함 열기">
+          <img src="qr/cem.png" alt="채은미 QR" loading="lazy">
+        </a>
+        <div class="meta">
+          <div class="nm">채은미 <em>차장</em></div>
+          <div class="dp">영업팀</div>
+        </div>
+        <div class="acts">
+          <a class="b prim" href="card/cem/">명함 열기</a>
+          <a class="b" href="qr/cem_share.png" download>카톡 공유이미지</a>
+          <button class="b" data-url="https://aacbal22.github.io/simpleline-cards/card/cem/" onclick="cp(this)">링크 복사</button>
+        </div>
+      </div>
+      <div class="card">
+        <a class="qr" href="card/kjh/" title="명함 열기">
+          <img src="qr/kjh.png" alt="김준형 QR" loading="lazy">
+        </a>
+        <div class="meta">
+          <div class="nm">김준형 <em>실장</em></div>
+          <div class="dp">영업팀</div>
+        </div>
+        <div class="acts">
+          <a class="b prim" href="card/kjh/">명함 열기</a>
+          <a class="b" href="qr/kjh_share.png" download>카톡 공유이미지</a>
+          <button class="b" data-url="https://aacbal22.github.io/simpleline-cards/card/kjh/" onclick="cp(this)">링크 복사</button>
+        </div>
+      </div>
+    </div>
+    <footer>SIMPLELINE · GitHub Pages 호스팅 (PC 꺼져도 항상 열림)</footer>
+  </div>
+  <div class="toast" id="toast">링크가 복사되었습니다</div>
+<script>
+  function cp(btn){
+    var u=btn.dataset.url;
+    navigator.clipboard.writeText(u).then(function(){
+      var t=document.getElementById('toast');t.classList.add('on');
+      setTimeout(function(){t.classList.remove('on')},1500);
+    });
+  }
+</script>
+</body>
+</html>
