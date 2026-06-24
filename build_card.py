@@ -241,6 +241,72 @@ def make_qr(url, out_path):
     img.save(out_path)
 
 
+def make_share(data, page_url, out_path):
+    """카톡 '나와의 채팅' 등에 보내기 좋은, 이름표 들어간 공유용 QR 이미지."""
+    import qrcode
+    from PIL import Image, ImageDraw, ImageFont
+
+    brand = data.get("brand_color", "#B0481F")
+    f = data["front"]
+    name = f["name"]
+    title = f.get("title", "")
+    dept = f.get("dept", "")
+    company = (data.get("company_mark", "") + data.get("company_kr", "")).strip()
+    web = f.get("web", "")
+
+    W, H = 820, 1080
+    canvas = Image.new("RGB", (W, H), "white")
+    d = ImageDraw.Draw(canvas)
+
+    FB = "C:/Windows/Fonts/malgunbd.ttf"
+    FR = "C:/Windows/Fonts/malgun.ttf"
+    f_company = ImageFont.truetype(FB, 30)
+    f_name = ImageFont.truetype(FB, 52)
+    f_title = ImageFont.truetype(FB, 30)
+    f_dept = ImageFont.truetype(FR, 26)
+    f_cap = ImageFont.truetype(FB, 30)
+    f_url = ImageFont.truetype(FR, 22)
+
+    # 상단 브랜드 바
+    d.rectangle([0, 0, W, 12], fill=brand)
+
+    # 회사명 (브랜드 컬러)
+    d.text((60, 56), company, font=f_company, fill=brand)
+
+    # 이름 + 직함
+    name_y = 100
+    d.text((60, name_y), name, font=f_name, fill="#1a1a1a")
+    nbox = d.textbbox((60, name_y), name, font=f_name)
+    d.text((nbox[2] + 12, name_y + 18), title, font=f_title, fill="#6b6b6b")
+    if dept:
+        d.text((60, name_y + 66), dept, font=f_dept, fill="#6b6b6b")
+
+    # QR (중앙)
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=14, border=1)
+    qr.add_data(page_url)
+    qr.make(fit=True)
+    qimg = qr.make_image(fill_color="#1a1a1a", back_color="white").convert("RGB")
+    QS = 600
+    qimg = qimg.resize((QS, QS), Image.NEAREST)
+    qx = (W - QS) // 2
+    qy = 250
+    canvas.paste(qimg, (qx, qy))
+
+    # 캡션 (중앙)
+    cap = "스캔하면 디지털 명함이 열립니다"
+    cbox = d.textbbox((0, 0), cap, font=f_cap)
+    d.text(((W - (cbox[2] - cbox[0])) // 2, qy + QS + 36), cap, font=f_cap, fill="#1a1a1a")
+
+    # URL (중앙, 연한색)
+    ubox = d.textbbox((0, 0), page_url, font=f_url)
+    d.text(((W - (ubox[2] - ubox[0])) // 2, qy + QS + 84), page_url, font=f_url, fill="#9a9a9a")
+
+    # 하단 브랜드 바
+    d.rectangle([0, H - 12, W, H], fill=brand)
+
+    canvas.save(out_path)
+
+
 def process(json_path, base_url):
     with open(json_path, encoding="utf-8") as fp:
         data = json.load(fp)
@@ -253,10 +319,12 @@ def process(json_path, base_url):
     qr_dir = os.path.join(ROOT, "docs", "qr")
     os.makedirs(qr_dir, exist_ok=True)
     make_qr(page_url, os.path.join(qr_dir, f"{slug}.png"))
+    make_share(data, page_url, os.path.join(qr_dir, f"{slug}_share.png"))
     print(f"[OK] {slug}")
-    print(f"     page : {page_url}")
-    print(f"     html : docs/card/{slug}/index.html")
-    print(f"     qr   : docs/qr/{slug}.png")
+    print(f"     page  : {page_url}")
+    print(f"     html  : docs/card/{slug}/index.html")
+    print(f"     qr    : docs/qr/{slug}.png")
+    print(f"     share : docs/qr/{slug}_share.png  (카톡 공유용)")
 
 
 def main():
