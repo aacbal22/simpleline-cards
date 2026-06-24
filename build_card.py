@@ -113,6 +113,15 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .hint{font-size:11px;color:#9a9a9a;text-align:center}
 .row{display:block;color:inherit;text-decoration:none}
 .ico{display:inline-block;width:14px;opacity:.6;margin-right:4px}
+/* QR 보여주기 오버레이 */
+.qr-overlay{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:18px;z-index:99;padding:24px}
+.qr-overlay.on{display:flex}
+.qr-overlay img{width:min(78vw,360px);height:auto;border:1px solid var(--line);border-radius:12px}
+.qr-overlay .cap{font-size:15px;font-weight:700;color:var(--ink)}
+.qr-overlay .sub{font-size:13px;color:var(--muted);margin-top:-10px}
+.qr-overlay .close{border:1px solid var(--line);background:#fff;border-radius:12px;
+  font:inherit;font-weight:700;padding:12px 28px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -153,12 +162,21 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 
   <div class="actions">
     <button class="btn btn-primary" id="save">📇 연락처 저장 / Save Contact</button>
+    <button class="btn" id="showqr" style="background:#fff;color:var(--ink);border:1px solid var(--line)">📲 상대에게 내 QR 보여주기</button>
     <div class="btn-row">
       <a class="btn" href="tel:%%CELL%%">☎ 전화</a>
       <a class="btn" href="sms:%%CELL%%">💬 문자</a>
       <a class="btn" href="mailto:%%EMAIL%%">✉ 메일</a>
     </div>
     <div class="hint">QR 스캔 → 이 명함 · 탭으로 한글/영문 전환</div>
+  </div>
+
+  <!-- 내 QR 전체화면 (상대가 스캔하도록 보여주기) -->
+  <div class="qr-overlay" id="qrov">
+    <div class="cap">%%FN%% · %%COMPANY_KR%%</div>
+    <img src="../../qr/%%SLUG%%.png" alt="내 명함 QR">
+    <div class="sub">이 QR을 스캔하면 제 명함이 열립니다</div>
+    <button class="close" id="closeqr">닫기</button>
   </div>
 
 <script>
@@ -170,6 +188,10 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
     document.getElementById('front').classList.toggle('show',s==='front');
     document.getElementById('back').classList.toggle('show',s==='back');
   }});
+  // 내 QR 보여주기
+  var ov=document.getElementById('qrov');
+  document.getElementById('showqr').onclick=function(){ov.classList.add('on')};
+  document.getElementById('closeqr').onclick=function(){ov.classList.remove('on')};
   // vCard 다운로드
   var VCARD="%%VCARD_JS%%";
   document.getElementById('save').onclick=function(){
