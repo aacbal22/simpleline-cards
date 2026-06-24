@@ -59,6 +59,9 @@ def render_html(data, base_url):
             out.append(f'<a href="tel:{esc(tel)}" class="row"><span class="ico">☎</span>{esc(p)}</a>')
         return "\n".join(out)
 
+    photo = data.get("photo")
+    avatar_html = f'<img class="avatar" src="../../assets/{esc(photo)}" alt="{esc(f["name"])}">' if photo else ""
+
     front_phones = phone_links(f["phones"])
     back_phones = phone_links(b["phones"])
     front_addr = "<br>".join(esc(a) for a in f["addresses"])
@@ -78,6 +81,7 @@ def render_html(data, base_url):
 html,body{height:100%}
 body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:#f1f0ee;color:var(--ink);
   display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:18px;gap:14px}
+.avatar{width:104px;height:104px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.18);margin-bottom:2px}
 .tabs{display:flex;gap:6px;background:#e3e1de;padding:4px;border-radius:999px}
 .tab{border:0;background:transparent;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
   padding:8px 20px;border-radius:999px;cursor:pointer;transition:.18s}
@@ -125,6 +129,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 </style>
 </head>
 <body>
+  %%AVATAR%%
   <div class="tabs">
     <button class="tab active" data-side="front">한글</button>
     <button class="tab" data-side="back">English</button>
@@ -225,6 +230,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
         "%%CELL%%": esc(data["vcard"].get("cell", "").replace(" ", "")),
         "%%VCARD_JS%%": vcard_js,
         "%%SLUG%%": slug,
+        "%%AVATAR%%": avatar_html,
     }
     out = tpl
     for k, val in repl.items():
@@ -319,17 +325,20 @@ def build_index(base_url):
             "name": f["name"],
             "title": f.get("title", ""),
             "dept": f.get("dept", ""),
+            "photo": dd.get("photo", ""),
             "company": (dd.get("company_mark", "") + dd.get("company_kr", "")).strip(),
             "url": f"{base_url}/card/{dd['slug']}/",
         })
     cards_html = []
     for it in items:
+        avatar = f'<img class="gava" src="assets/{esc(it["photo"])}" alt="{esc(it["name"])}" loading="lazy">' if it.get("photo") else ""
         cards_html.append(f"""
       <div class="card">
         <a class="qr" href="card/{esc(it['slug'])}/" title="명함 열기">
           <img src="qr/{esc(it['slug'])}.png" alt="{esc(it['name'])} QR" loading="lazy">
         </a>
         <div class="meta">
+          {avatar}
           <div class="nm">{esc(it['name'])} <em>{esc(it['title'])}</em></div>
           <div class="dp">{esc(it['dept'])}</div>
         </div>
@@ -360,6 +369,7 @@ header p{font-size:13px;color:var(--muted);margin-top:4px}
 .card .qr{display:block}
 .card .qr img{width:148px;height:148px;border:1px solid var(--line);border-radius:8px;display:block}
 .meta{text-align:center}
+.gava{width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15);margin-bottom:4px}
 .meta .nm{font-size:16px;font-weight:800}
 .meta .nm em{font-size:12px;font-weight:600;font-style:normal;color:var(--muted);margin-left:3px}
 .meta .dp{font-size:12px;color:var(--muted);margin-top:1px}
