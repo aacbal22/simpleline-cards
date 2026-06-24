@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>채은미 · 심플라인 디지털 명함</title>
+<meta name="description" content="채은미 차장 — 심플라인 디지털 명함">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{ --brand:#B0481F; --ink:#1a1a1a; --muted:#6b6b6b; --line:#ececec; }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:#f1f0ee;color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:18px;gap:14px}
+.tabs{display:flex;gap:6px;background:#e3e1de;padding:4px;border-radius:999px}
+.tab{border:0;background:transparent;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
+  padding:8px 20px;border-radius:999px;cursor:pointer;transition:.18s}
+.tab.active{background:#fff;color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card{width:100%;max-width:380px;aspect-ratio:1.75/1;border-radius:18px;overflow:hidden;
+  box-shadow:0 12px 34px rgba(0,0,0,.16);position:relative;display:none}
+.card.show{display:block}
+/* FRONT (KR) */
+.front{background:#fbfaf8;padding:24px 24px 20px}
+.front .logo{font-size:21px;font-weight:800;color:var(--brand);letter-spacing:-.5px}
+.front .logo small{font-size:13px;font-weight:700;vertical-align:6px;margin-right:2px}
+.front .who{position:absolute;top:24px;right:24px;text-align:right}
+.front .who .nm{font-size:19px;font-weight:800;letter-spacing:-.3px}
+.front .who .nm em{font-size:12px;font-weight:600;font-style:normal;margin-left:4px;color:var(--muted)}
+.front .who .dp{font-size:12px;color:var(--muted);margin-top:1px}
+.front .info{position:absolute;left:24px;right:24px;bottom:18px;text-align:right;font-size:11.5px;line-height:1.55;color:#333}
+.front .info .em{color:var(--brand);font-weight:600}
+/* BACK (EN) */
+.back{background:var(--brand);color:#fff;padding:24px}
+.back .vbrand{position:absolute;left:20px;top:0;bottom:0;display:flex;align-items:center}
+.back .vbrand span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:17px;font-weight:800;letter-spacing:1px}
+.back .who{text-align:right}
+.back .who .nm{font-size:18px;font-weight:800;letter-spacing:.5px}
+.back .who .dp{font-size:12px;opacity:.92;margin-top:2px}
+.back .info{position:absolute;right:24px;bottom:18px;text-align:right;font-size:11px;line-height:1.55;opacity:.95}
+/* actions */
+.actions{display:flex;flex-direction:column;gap:8px;width:100%;max-width:380px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;
+  font:inherit;font-size:15px;font-weight:700;padding:14px;cursor:pointer;text-decoration:none}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1;background:#fff;color:var(--ink);border:1px solid var(--line);font-size:14px}
+.hint{font-size:11px;color:#9a9a9a;text-align:center}
+.row{display:block;color:inherit;text-decoration:none}
+.ico{display:inline-block;width:14px;opacity:.6;margin-right:4px}
+/* QR 보여주기 오버레이 */
+.qr-overlay{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:18px;z-index:99;padding:24px}
+.qr-overlay.on{display:flex}
+.qr-overlay img{width:min(78vw,360px);height:auto;border:1px solid var(--line);border-radius:12px}
+.qr-overlay .cap{font-size:15px;font-weight:700;color:var(--ink)}
+.qr-overlay .sub{font-size:13px;color:var(--muted);margin-top:-10px}
+.qr-overlay .close{border:1px solid var(--line);background:#fff;border-radius:12px;
+  font:inherit;font-weight:700;padding:12px 28px;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="tabs">
+    <button class="tab active" data-side="front">한글</button>
+    <button class="tab" data-side="back">English</button>
+  </div>
+
+  <!-- 앞면 (한글) -->
+  <div class="card front show" id="front">
+    <div class="logo"><small>(주)</small>심플라인</div>
+    <div class="who">
+      <div class="nm">채은미<em>차장</em></div>
+      <div class="dp">영업팀</div>
+    </div>
+    <div class="info">
+      <a href="tel:01034044231" class="row"><span class="ico">☎</span>010-3404-4231</a>
+<a href="tel:0318554243" class="row"><span class="ico">☎</span>031-855-4243</a>
+      <a href="mailto:simpleline7@naver.com" class="row"><span class="ico">✉</span><span class="em">simpleline7@naver.com</span></a>
+      <div style="margin-top:4px">경기도 양주시 광적면 광적로 368-14</div>
+      <a href="http://www.simpleline.co.kr" class="row" style="color:var(--brand);font-weight:600">www.simpleline.co.kr</a>
+    </div>
+  </div>
+
+  <!-- 뒷면 (영문) -->
+  <div class="card back" id="back">
+    <div class="vbrand"><span>SIMPLELINE.</span></div>
+    <div class="who">
+      <div class="nm">CHAE EUN MI</div>
+      <div class="dp">Sales Team_Deputy General Manager</div>
+    </div>
+    <div class="info">
+      <a href="tel:+821034044231" class="row"><span class="ico">☎</span>+82-10-3404-4231</a>
+<a href="tel:+82318554243" class="row"><span class="ico">☎</span>+82-31-855-4243</a>
+      <a href="mailto:simpleline7@naver.com" class="row" style="color:#fff"><span class="ico" style="opacity:.8">✉</span>simpleline7@naver.com</a>
+      <div style="margin-top:4px">368-14, Gwangjeok-ro, Gwangjeok-myeon,<br>Yangju-si, Gyeonggi-do, Republic of Korea</div>
+      <div>www.simpleline.co.kr</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" id="save">📇 연락처 저장 / Save Contact</button>
+    <button class="btn" id="showqr" style="background:#fff;color:var(--ink);border:1px solid var(--line)">📲 상대에게 내 QR 보여주기</button>
+    <div class="btn-row">
+      <a class="btn" href="tel:+82-10-3404-4231">☎ 전화</a>
+      <a class="btn" href="sms:+82-10-3404-4231">💬 문자</a>
+      <a class="btn" href="mailto:simpleline7@naver.com">✉ 메일</a>
+    </div>
+    <div class="hint">QR 스캔 → 이 명함 · 탭으로 한글/영문 전환</div>
+  </div>
+
+  <!-- 내 QR 전체화면 (상대가 스캔하도록 보여주기) -->
+  <div class="qr-overlay" id="qrov">
+    <div class="cap">채은미 · 심플라인</div>
+    <img src="../../qr/cem.png" alt="내 명함 QR">
+    <div class="sub">이 QR을 스캔하면 제 명함이 열립니다</div>
+    <button class="close" id="closeqr">닫기</button>
+  </div>
+
+<script>
+  // 탭 전환
+  var tabs=document.querySelectorAll('.tab');
+  tabs.forEach(function(t){t.onclick=function(){
+    tabs.forEach(function(x){x.classList.remove('active')});t.classList.add('active');
+    var s=t.dataset.side;
+    document.getElementById('front').classList.toggle('show',s==='front');
+    document.getElementById('back').classList.toggle('show',s==='back');
+  }});
+  // 내 QR 보여주기
+  var ov=document.getElementById('qrov');
+  document.getElementById('showqr').onclick=function(){ov.classList.add('on')};
+  document.getElementById('closeqr').onclick=function(){ov.classList.remove('on')};
+  // vCard 다운로드
+  var VCARD="BEGIN:VCARD\nVERSION:3.0\nN:Chae;Eun Mi;;;\nFN:채은미\nORG:(주)심플라인 / SIMPLELINE\nTITLE:영업팀 차장 (Deputy General Manager)\nTEL;TYPE=CELL:+82-10-3404-4231\nTEL;TYPE=WORK,VOICE:+82-31-855-4243\nEMAIL;TYPE=WORK:simpleline7@naver.com\nURL:http://www.simpleline.co.kr\nADR;TYPE=WORK:;;경기도 양주시 광적면 광적로 368-14;;;;\nEND:VCARD";
+  document.getElementById('save').onclick=function(){
+    var blob=new Blob([VCARD],{type:'text/vcard;charset=utf-8'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download='cem.vcf';
+    document.body.appendChild(a);a.click();a.remove();
+  };
+</script>
+</body>
+</html>
