@@ -1,0 +1,42 @@
+{
+  "slug": "jyw",
+  "brand_color": "#B0481F",
+  "company_kr": "심플라인",
+  "company_en": "SIMPLELINE.",
+  "company_mark": "(주)",
+  "front": {
+    "name": "진요원",
+    "title": "차장",
+    "dept": "자재구매팀",
+    "phones": ["010-7100-7588", "031-855-4243"],
+    "email": "jinyo97@nate.com",
+    "addresses": [
+      "경기도 양주시 광적면 광적로 368-14",
+      "서울시 성동구 성수이로22길 61, 5층"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "back": {
+    "name": "JIN YO WON",
+    "title": "Purchasing Team_Deputy General Manager",
+    "phones": ["+82-10-7100-7588", "+82-31-855-4243"],
+    "email": "jinyo97@nate.com",
+    "addresses": [
+      "368-14, Gwangjeok-ro, Gwangjeok-myeon,",
+      "Yangju-si, Gyeonggi-do, Republic of Korea"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "vcard": {
+    "last_name": "Jin",
+    "first_name": "Yo Won",
+    "full_name_kr": "진요원",
+    "org": "(주)심플라인 / SIMPLELINE",
+    "title": "자재구매팀 차장 (Deputy General Manager)",
+    "cell": "+82-10-7100-7588",
+    "work_tel": "+82-31-855-4243",
+    "email": "jinyo97@nate.com",
+    "url": "http://www.simpleline.co.kr",
+    "adr": "경기도 양주시 광적면 광적로 368-14"
+  }
+}

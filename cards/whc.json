@@ -1,0 +1,42 @@
+{
+  "slug": "whc",
+  "brand_color": "#B0481F",
+  "company_kr": "심플라인",
+  "company_en": "SIMPLELINE.",
+  "company_mark": "(주)",
+  "front": {
+    "name": "원철희",
+    "title": "대리",
+    "dept": "영업팀",
+    "phones": ["010-3869-4658", "031-855-4243"],
+    "email": "ch.won@simpleline.co.kr",
+    "addresses": [
+      "경기도 양주시 광적면 광적로 368-14",
+      "서울시 성동구 성수이로22길 61, 5층"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "back": {
+    "name": "WON CHUL HEE",
+    "title": "Sales Team_Assistant Manager",
+    "phones": ["+82-10-3869-4658", "+82-31-855-4243"],
+    "email": "ch.won@simpleline.co.kr",
+    "addresses": [
+      "368-14, Gwangjeok-ro, Gwangjeok-myeon,",
+      "Yangju-si, Gyeonggi-do, Republic of Korea"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "vcard": {
+    "last_name": "Won",
+    "first_name": "Chul Hee",
+    "full_name_kr": "원철희",
+    "org": "(주)심플라인 / SIMPLELINE",
+    "title": "영업팀 대리 (Assistant Manager)",
+    "cell": "+82-10-3869-4658",
+    "work_tel": "+82-31-855-4243",
+    "email": "ch.won@simpleline.co.kr",
+    "url": "http://www.simpleline.co.kr",
+    "adr": "경기도 양주시 광적면 광적로 368-14"
+  }
+}
