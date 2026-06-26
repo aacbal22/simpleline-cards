@@ -87,6 +87,10 @@ def main():
     else:
         print("  (배포하려면 --push 를 붙여 다시 실행하거나, 직접 git push)")
 
+    # 명함에서 '사진 탭 → 뒷4자리'로 바꿀 수 있도록 PIN 등록
+    pin = mt.set_pin(args.slug, data["front"]["phones"][0])
+    print(f"[PIN] 사진변경 본인확인 = 휴대폰 뒷 4자리({pin})")
+
     link = mt.issue_token(args.slug, name)
     print("\n" + "=" * 56)
     print(f"  {name}({args.slug}) 사진 업로드 링크")

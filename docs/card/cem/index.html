@@ -28,7 +28,12 @@
 html,body{height:100%}
 body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--ink);
   display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:18px;gap:14px}
-.avatar{width:156px;height:156px;border-radius:50%;object-fit:cover;border:4px solid var(--surface);box-shadow:0 6px 18px var(--shadow);margin-bottom:2px}
+.avatar-btn{position:relative;width:156px;height:156px;border-radius:50%;border:4px solid var(--surface);padding:0;
+  background:#e3e1de;cursor:pointer;margin-bottom:2px;box-shadow:0 6px 18px var(--shadow);overflow:hidden;display:block}
+.avatar{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.avatar-empty{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;color:#9a9a9a;font-size:32px;font-weight:300}
+.avatar-empty small{font-size:11px;font-weight:600;margin-top:1px}
+.avatar-edit{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);color:#fff;font-size:10.5px;font-weight:700;padding:5px 0;text-align:center;letter-spacing:.3px}
 .tabs{display:flex;gap:6px;background:var(--tab-bg);padding:4px;border-radius:999px}
 .tab{border:0;background:transparent;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
   padding:8px 20px;border-radius:999px;cursor:pointer;transition:.18s}
@@ -81,10 +86,31 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .qr-overlay .sub{font-size:13px;color:#6b6b6b;margin-top:-10px}
 .qr-overlay .close{border:1px solid #ececec;background:#fff;color:#1a1a1a;border-radius:12px;
   font:inherit;font-weight:700;padding:12px 28px;cursor:pointer}
+/* 사진 변경 모달 */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal.on{display:flex}
+.sheet{position:relative;background:var(--surface);border-radius:18px;width:100%;max-width:360px;padding:24px 22px 22px;text-align:center;color:var(--ink)}
+.sheet h3{font-size:17px;font-weight:800;margin-bottom:5px}
+.sheet .desc{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.m-close{position:absolute;top:10px;right:14px;font-size:24px;line-height:1;color:var(--muted);background:0;border:0;cursor:pointer}
+.pin-in{width:170px;font:inherit;font-size:22px;font-weight:800;letter-spacing:10px;text-align:center;padding:12px 12px 12px 22px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);outline:none}
+.pin-in:focus{border-color:var(--brand)}
+.crop-area{width:240px;height:240px;border-radius:50%;overflow:hidden;margin:4px auto 6px;background:#222;touch-action:none;position:relative}
+.crop-area canvas{width:100%;height:100%;display:block;cursor:grab}
+.crop-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:13px}
+.zoom{width:100%;margin:8px 0 2px;accent-color:var(--brand)}
+.m-btn{display:block;width:100%;border:0;border-radius:12px;font:inherit;font-size:15px;font-weight:700;padding:13px;cursor:pointer;margin-top:9px}
+.m-btn:disabled{opacity:.45;cursor:default}
+.m-primary{background:var(--brand);color:#fff}
+.m-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.m-msg{font-size:13px;font-weight:700;min-height:17px;margin-top:9px}
+.m-msg.err{color:#c0392b}.m-msg.ok{color:#1a7a3c}
+.step{display:none}.step.on{display:block}
+input[type=file]{display:none}
 </style>
 </head>
 <body>
-  <img class="avatar" src="https://simpleline-card-photos.jh-kim-28b.workers.dev/photo/cem" alt="채은미" data-static="" onerror="this.onerror=null;var s=this.dataset.static;if(s){this.src=s;this.onerror=function(){this.style.display='none'};}else{this.style.display='none';}">
+  <button class="avatar-btn" id="avatarBtn" aria-label="프로필 사진 변경"><img class="avatar" id="avatarImg" src="https://simpleline-card-photos.jh-kim-28b.workers.dev/photo/cem" alt="채은미" data-static=""><span class="avatar-empty" id="avatarEmpty">＋<small>사진</small></span><span class="avatar-edit">✎ 변경</span></button>
   <div class="tabs">
     <button class="tab active" data-side="front">한글</button>
     <button class="tab" data-side="back">English</button>
@@ -147,6 +173,32 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
     <button class="close" id="closeqr">닫기</button>
   </div>
 
+  <!-- 사진 변경 모달 (사진 탭하면 열림) -->
+  <div class="modal" id="photoModal">
+    <div class="sheet">
+      <button class="m-close" id="mClose">&times;</button>
+      <!-- 1) 본인 확인 -->
+      <div class="step on" id="stepPin">
+        <h3>본인 확인</h3>
+        <div class="desc">내 휴대폰 번호 <b>뒷 4자리</b>를 입력하세요.</div>
+        <input class="pin-in" id="pinIn" type="tel" inputmode="numeric" maxlength="4" placeholder="0000">
+        <div class="m-msg" id="pinMsg"></div>
+        <button class="m-btn m-primary" id="pinNext">다음</button>
+      </div>
+      <!-- 2) 사진 편집 -->
+      <div class="step" id="stepCrop">
+        <h3>사진 편집</h3>
+        <div class="desc">드래그로 위치, 슬라이더로 크기를 맞추세요.</div>
+        <div class="crop-area"><canvas id="cropCv" width="512" height="512"></canvas><div class="crop-ph" id="cropPh">사진을 선택하세요</div></div>
+        <input class="zoom" id="zoom" type="range" min="1" max="3" step="0.01" value="1" disabled>
+        <label class="m-btn m-ghost" for="fileIn">📷 사진 선택 / 변경</label>
+        <input type="file" id="fileIn" accept="image/*">
+        <button class="m-btn m-primary" id="upBtn" disabled>이 사진으로 등록</button>
+        <div class="m-msg" id="cropMsg"></div>
+      </div>
+    </div>
+  </div>
+
 <script>
   // 탭 / 명함 터치로 앞뒤 3D 플립
   var tabs=document.querySelectorAll('.tab'),flip=document.getElementById('flip');
@@ -180,6 +232,104 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
     a.href=URL.createObjectURL(blob);a.download='cem.vcf';
     document.body.appendChild(a);a.click();a.remove();
   };
+
+  // ===== 프로필 사진: 표시 + 탭하여 변경 =====
+  (function(){
+    var SLUG="cem", WORKER="https://simpleline-card-photos.jh-kim-28b.workers.dev";
+    var urlToken=(new URLSearchParams(location.search)).get('t')||'';
+    var pin='';
+    var img=document.getElementById('avatarImg'), empty=document.getElementById('avatarEmpty');
+
+    // 사진 로드: 성공→empty숨김 / 실패→정적폴백→그래도 실패면 +사진 표시
+    img.addEventListener('load',function(){ empty.style.display='none'; img.style.display='block'; });
+    img.addEventListener('error',function(){
+      var s=img.getAttribute('data-static');
+      if(s && img.src.indexOf(s)<0){ img.src=s; return; }
+      img.style.display='none'; empty.style.display='flex';
+    });
+
+    var modal=document.getElementById('photoModal');
+    var stepPin=document.getElementById('stepPin'), stepCrop=document.getElementById('stepCrop');
+    function showStep(s){ stepPin.classList.toggle('on',s==='pin'); stepCrop.classList.toggle('on',s==='crop'); }
+    function openModal(){ modal.classList.add('on'); if(urlToken){ showStep('crop'); } else { showStep('pin'); document.getElementById('pinIn').focus(); } }
+    function closeModal(){ modal.classList.remove('on'); }
+    document.getElementById('avatarBtn').onclick=openModal;
+    document.getElementById('mClose').onclick=closeModal;
+    modal.addEventListener('click',function(e){ if(e.target===modal) closeModal(); });
+
+    // 1) PIN
+    var pinIn=document.getElementById('pinIn'), pinMsg=document.getElementById('pinMsg');
+    document.getElementById('pinNext').onclick=function(){
+      var v=(pinIn.value||'').trim();
+      if(!/^[0-9]{4}$/.test(v)){ pinMsg.className='m-msg err'; pinMsg.textContent='숫자 4자리를 입력하세요.'; return; }
+      pin=v; pinMsg.textContent=''; showStep('crop');
+    };
+
+    // 2) 크롭 편집
+    var cv=document.getElementById('cropCv'), ctx=cv.getContext('2d',{willReadFrequently:true});
+    var fileIn=document.getElementById('fileIn'), upBtn=document.getElementById('upBtn');
+    var zoom=document.getElementById('zoom'), cropPh=document.getElementById('cropPh'), cropMsg=document.getElementById('cropMsg');
+    var bmp=null, baseScale=1, ox=0, oy=0, drag=false, lx=0, ly=0;
+
+    function loadBitmap(f){
+      if(window.createImageBitmap) return createImageBitmap(f,{imageOrientation:'from-image'}).catch(function(){return createImageBitmap(f);});
+      return new Promise(function(res,rej){ var im=new Image(); im.onload=function(){res(im)}; im.onerror=rej; im.src=URL.createObjectURL(f); });
+    }
+    function clamp(){
+      var sc=baseScale*parseFloat(zoom.value), w=bmp.width*sc, h=bmp.height*sc;
+      if(ox>0)ox=0; if(oy>0)oy=0; if(ox<512-w)ox=512-w; if(oy<512-h)oy=512-h;
+    }
+    function render(){
+      if(!bmp)return; var sc=baseScale*parseFloat(zoom.value);
+      ctx.clearRect(0,0,512,512); ctx.drawImage(bmp,ox,oy,bmp.width*sc,bmp.height*sc);
+    }
+    function isBlank(){
+      try{ var dt=ctx.getImageData(0,0,512,512).data, first=null, diff=0;
+        for(var i=0;i<dt.length;i+=3988){ var v=dt[i]+dt[i+1]+dt[i+2]; if(first===null)first=v; else if(Math.abs(v-first)>14)diff++; }
+        return diff<2;
+      }catch(e){ return false; }
+    }
+    fileIn.onchange=function(e){
+      var f=e.target.files[0]; if(!f)return;
+      cropMsg.className='m-msg'; cropMsg.textContent='불러오는 중…';
+      loadBitmap(f).then(function(b){
+        bmp=b; baseScale=Math.max(512/b.width,512/b.height); zoom.value=1; zoom.disabled=false;
+        ox=(512-b.width*baseScale)/2; oy=(512-b.height*baseScale)*0.38; clamp(); render();
+        cropPh.style.display='none';
+        if(isBlank()){ cropMsg.className='m-msg err'; cropMsg.textContent='사진을 불러오지 못했어요. 다른 사진을 선택하세요.'; upBtn.disabled=true; return; }
+        cropMsg.textContent=''; upBtn.disabled=false;
+      }).catch(function(){ cropMsg.className='m-msg err'; cropMsg.textContent='사진 형식을 읽지 못했어요. (JPG·PNG)'; });
+    };
+    zoom.oninput=function(){ clamp(); render(); };
+    cv.addEventListener('pointerdown',function(e){ if(!bmp)return; drag=true; lx=e.clientX; ly=e.clientY; cv.setPointerCapture(e.pointerId); });
+    cv.addEventListener('pointermove',function(e){ if(!drag)return; var r=cv.getBoundingClientRect(), k=512/r.width; ox+=(e.clientX-lx)*k; oy+=(e.clientY-ly)*k; lx=e.clientX; ly=e.clientY; clamp(); render(); });
+    cv.addEventListener('pointerup',function(){ drag=false; });
+    cv.addEventListener('pointercancel',function(){ drag=false; });
+
+    upBtn.onclick=function(){
+      if(!bmp)return;
+      if(isBlank()){ cropMsg.className='m-msg err'; cropMsg.textContent='사진이 비어 보여요. 다시 선택하세요.'; return; }
+      upBtn.disabled=true; cropMsg.className='m-msg'; cropMsg.textContent='업로드 중…';
+      cv.toBlob(function(blob){
+        var headers={'Content-Type':'image/jpeg'};
+        if(urlToken){ headers['X-Token']=urlToken; } else { headers['X-Slug']=SLUG; headers['X-Pin']=pin; }
+        fetch(WORKER+'/upload',{method:'POST',headers:headers,body:blob})
+          .then(function(r){return r.json()})
+          .then(function(j){
+            if(j.ok){
+              cropMsg.className='m-msg ok'; cropMsg.textContent='✅ 변경됐어요!';
+              img.style.display='block'; empty.style.display='none';
+              img.src=WORKER+'/photo/'+SLUG+'?v='+Date.now();
+              setTimeout(closeModal,900);
+            } else {
+              cropMsg.className='m-msg err'; cropMsg.textContent='⚠ '+(j.error||'실패했어요.'); upBtn.disabled=false;
+              if(!urlToken){ showStep('pin'); pinMsg.className='m-msg err'; pinMsg.textContent='뒷 4자리를 다시 확인하세요.'; }
+            }
+          })
+          .catch(function(){ cropMsg.className='m-msg err'; cropMsg.textContent='⚠ 네트워크 오류. 다시 시도하세요.'; upBtn.disabled=false; });
+      },'image/jpeg',0.9);
+    };
+  })();
 </script>
 </body>
 </html>

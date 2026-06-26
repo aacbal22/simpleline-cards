@@ -47,6 +47,14 @@ def issue_token(slug, name):
     return f"{WORKER}/u/{token}"
 
 
+def set_pin(slug, phone):
+    """명함에서 사진 변경 시 본인 확인용 PIN(휴대폰 뒷 4자리)을 KV에 저장."""
+    digits = "".join(c for c in str(phone) if c.isdigit())
+    pin = digits[-4:]
+    kv_put(f"pin:{slug}", pin)
+    return pin
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("slug", help="직원 약자 (cards/<slug>.json 과 일치)")
