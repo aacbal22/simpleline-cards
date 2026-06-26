@@ -1,0 +1,42 @@
+{
+  "slug": "yjw",
+  "brand_color": "#B0481F",
+  "company_kr": "심플라인",
+  "company_en": "SIMPLELINE.",
+  "company_mark": "(주)",
+  "front": {
+    "name": "양진욱",
+    "title": "이사",
+    "dept": "경영지원부",
+    "phones": ["010-5157-9477", "070-4202-8506"],
+    "email": "ju@simpleline.co.kr",
+    "addresses": [
+      "경기도 양주시 광적면 광적로 368-14",
+      "서울시 성동구 성수이로22길 61, 5층"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "back": {
+    "name": "YANG JIN WOOK",
+    "title": "Management Support_Director",
+    "phones": ["+82-10-5157-9477", "+82-70-4202-8506"],
+    "email": "ju@simpleline.co.kr",
+    "addresses": [
+      "368-14, Gwangjeok-ro, Gwangjeok-myeon,",
+      "Yangju-si, Gyeonggi-do, Republic of Korea"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "vcard": {
+    "last_name": "Yang",
+    "first_name": "Jin Wook",
+    "full_name_kr": "양진욱",
+    "org": "(주)심플라인 / SIMPLELINE",
+    "title": "경영지원부 이사 (Director)",
+    "cell": "+82-10-5157-9477",
+    "work_tel": "+82-70-4202-8506",
+    "email": "ju@simpleline.co.kr",
+    "url": "http://www.simpleline.co.kr",
+    "adr": "경기도 양주시 광적면 광적로 368-14"
+  }
+}
