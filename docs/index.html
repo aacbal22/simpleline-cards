@@ -58,12 +58,12 @@ footer{text-align:center;font-size:11px;color:#9a9a9a;margin-top:28px}
     <header>
       <h1>심플라인 디지털 명함 관리 <span class="ver">V1.0.0</span></h1>
       <p>명함을 누르면 페이지가 열립니다 · QR/링크/공유이미지를 한곳에서 관리</p>
-      <div class="count" id="count">총 7명</div>
+      <div class="count" id="count">총 8명</div>
       <div class="controls">
         <input class="search" id="search" type="search" placeholder="🔍 이름·직함·부서 검색" autocomplete="off">
         <div class="chips" id="chips">
           <button class="chip active" data-dept="">전체</button>
-          <button class="chip" data-dept="영업팀">영업팀</button><button class="chip" data-dept="영업팀_팀장">영업팀_팀장</button><button class="chip" data-dept="자재구매팀">자재구매팀</button>
+          <button class="chip" data-dept="경영지원부">경영지원부</button><button class="chip" data-dept="영업팀">영업팀</button><button class="chip" data-dept="영업팀_팀장">영업팀_팀장</button><button class="chip" data-dept="자재구매팀">자재구매팀</button>
         </div>
       </div>
     </header>
@@ -126,6 +126,21 @@ footer{text-align:center;font-size:11px;color:#9a9a9a;margin-top:28px}
           <a class="b prim" href="card/kjh/">명함 열기</a>
           <a class="b" href="qr/kjh_share.png" download>카톡 공유이미지</a>
           <button class="b" data-url="https://aacbal22.github.io/simpleline-cards/card/kjh/" onclick="cp(this)">링크 복사</button>
+        </div>
+      </div>
+      <div class="card" data-key="김주희 부장 경영지원부" data-dept="경영지원부">
+        <a class="qr" href="card/kju/" title="명함 열기">
+          <img src="qr/kju.png" alt="김주희 QR" loading="lazy">
+        </a>
+        <div class="meta">
+          <img class="gava" src="https://simpleline-card-photos.jh-kim-28b.workers.dev/photo/kju" alt="김주희" data-static="" loading="lazy" onerror="this.onerror=null;var s=this.dataset.static;if(s){this.src=s;this.onerror=function(){this.style.display='none'};}else{this.style.display='none';}">
+          <div class="nm">김주희 <em>부장</em></div>
+          <div class="dp">경영지원부</div>
+        </div>
+        <div class="acts">
+          <a class="b prim" href="card/kju/">명함 열기</a>
+          <a class="b" href="qr/kju_share.png" download>카톡 공유이미지</a>
+          <button class="b" data-url="https://aacbal22.github.io/simpleline-cards/card/kju/" onclick="cp(this)">링크 복사</button>
         </div>
       </div>
       <div class="card" data-key="박병선 차장 영업팀_팀장" data-dept="영업팀_팀장">

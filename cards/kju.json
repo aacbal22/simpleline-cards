@@ -1,0 +1,41 @@
+{
+  "slug": "kju",
+  "brand_color": "#B0481F",
+  "company_kr": "심플라인",
+  "company_en": "SIMPLELINE.",
+  "company_mark": "(주)",
+  "front": {
+    "name": "김주희",
+    "title": "부장",
+    "dept": "경영지원부",
+    "phones": ["010-3221-3256", "031-855-4243"],
+    "email": "wngmltjdrhd@simpleline.co.kr",
+    "addresses": [
+      "경기도 양주시 광적면 광적로 368-14"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "back": {
+    "name": "KIM JU HEE",
+    "title": "Management Support_General Manager",
+    "phones": ["+82-10-3221-3256", "+82-31-855-4243"],
+    "email": "wngmltjdrhd@simpleline.co.kr",
+    "addresses": [
+      "368-14, Gwangjeok-ro, Gwangjeok-myeon,",
+      "Yangju-si, Gyeonggi-do, Republic of Korea"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "vcard": {
+    "last_name": "Kim",
+    "first_name": "Ju Hee",
+    "full_name_kr": "김주희",
+    "org": "(주)심플라인 / SIMPLELINE",
+    "title": "경영지원부 부장 (General Manager)",
+    "cell": "+82-10-3221-3256",
+    "work_tel": "+82-31-855-4243",
+    "email": "wngmltjdrhd@simpleline.co.kr",
+    "url": "http://www.simpleline.co.kr",
+    "adr": "경기도 양주시 광적면 광적로 368-14"
+  }
+}
