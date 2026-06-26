@@ -65,6 +65,9 @@ def render_html(data, base_url):
     tagline = f.get("tagline") or data.get("tagline") or ""
     tagline_html = f'<div class="tagline">{esc(tagline)}</div>' if tagline else ""
 
+    # 홈화면 아이콘: 사진 있으면 본인 얼굴, 없으면 공용 브랜드 아이콘
+    icon_rel = f"../../assets/{esc(photo)}" if photo else "../../assets/icon-180.png"
+
     front_phones = phone_links(f["phones"])
     back_phones = phone_links(b["phones"])
     front_addr = "<br>".join(esc(a) for a in f["addresses"])
@@ -77,6 +80,17 @@ def render_html(data, base_url):
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>%%FN%% · %%COMPANY_KR%% 디지털 명함</title>
 <meta name="description" content="%%FN%% %%TITLE%% — %%COMPANY_KR%% 디지털 명함">
+<!-- 항상 최신을 받도록 캐시 최소화 -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- 폰 홈화면 추가용 아이콘/테마 -->
+<meta name="theme-color" content="%%BRAND%%">
+<link rel="apple-touch-icon" href="%%ICON%%">
+<link rel="icon" type="image/png" href="%%ICON%%">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="%%FN%%">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{ color-scheme:light dark; --brand:%%BRAND%%; --ink:#1a1a1a; --muted:#6b6b6b; --line:#ececec;
@@ -267,6 +281,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
         "%%AVATAR%%": avatar_html,
         "%%TAGLINE%%": tagline_html,
         "%%PAGE_URL%%": page_url,
+        "%%ICON%%": icon_rel,
     }
     out = tpl
     for k, val in repl.items():
@@ -281,6 +296,26 @@ def make_qr(url, out_path):
     qr.make(fit=True)
     img = qr.make_image(fill_color="#1a1a1a", back_color="white")
     img.save(out_path)
+
+
+def make_brand_icons(brand="#B0481F", text="SL"):
+    """폰 홈화면용 공용 브랜드 아이콘. 브랜드 컬러 배경 + 흰 모노그램.
+    docs/assets/icon-180.png (Apple touch icon) · icon-512.png 생성."""
+    from PIL import Image, ImageDraw, ImageFont
+    assets = os.path.join(ROOT, "docs", "assets")
+    os.makedirs(assets, exist_ok=True)
+    for size in (180, 512):
+        img = Image.new("RGB", (size, size), brand)
+        d = ImageDraw.Draw(img)
+        try:
+            font = ImageFont.truetype("C:/Windows/Fonts/malgunbd.ttf", int(size * 0.44))
+        except Exception:
+            font = ImageFont.load_default()
+        tb = d.textbbox((0, 0), text, font=font)
+        tw, th = tb[2] - tb[0], tb[3] - tb[1]
+        d.text(((size - tw) / 2 - tb[0], (size - th) / 2 - tb[1]), text, font=font, fill="white")
+        img.save(os.path.join(assets, f"icon-{size}.png"))
+    print("[ICON] docs/assets/icon-180.png · icon-512.png")
 
 
 def make_share(data, page_url, out_path):
@@ -395,6 +430,15 @@ def build_index(base_url):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>심플라인 디지털 명함 관리</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="theme-color" content="#B0481F">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" href="assets/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="심플라인 명함">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{color-scheme:light;--brand:#B0481F;--ink:#1a1a1a;--muted:#6b6b6b;--line:#ececec}
@@ -529,6 +573,7 @@ def main():
     if not files:
         print("입력 JSON을 찾지 못함:", args.inputs); sys.exit(1)
     base = args.base_url.rstrip("/")
+    make_brand_icons()  # 폰 홈화면용 공용 브랜드 아이콘 (사진 없는 명함 + 갤러리)
     for jp in files:
         process(jp, base)
     build_index(base)  # 명함 추가/수정 시 관리 갤러리도 항상 갱신
