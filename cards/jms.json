@@ -1,0 +1,42 @@
+{
+  "slug": "jms",
+  "brand_color": "#B0481F",
+  "company_kr": "심플라인",
+  "company_en": "SIMPLELINE.",
+  "company_mark": "(주)",
+  "front": {
+    "name": "정민성",
+    "title": "사원",
+    "dept": "영업팀",
+    "phones": ["010-6540-2282", "031-855-4243"],
+    "email": "ms.jung@simpleline.co.kr",
+    "addresses": [
+      "경기도 양주시 광적면 광적로 368-14",
+      "서울시 성동구 성수이로22길 61, 5층"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "back": {
+    "name": "JUNG MIN SEONG",
+    "title": "Sales Team_Staff",
+    "phones": ["+82-10-6540-2282", "+82-31-855-4243"],
+    "email": "ms.jung@simpleline.co.kr",
+    "addresses": [
+      "368-14, Gwangjeok-ro, Gwangjeok-myeon,",
+      "Yangju-si, Gyeonggi-do, Republic of Korea"
+    ],
+    "web": "www.simpleline.co.kr"
+  },
+  "vcard": {
+    "last_name": "Jung",
+    "first_name": "Min Seong",
+    "full_name_kr": "정민성",
+    "org": "(주)심플라인 / SIMPLELINE",
+    "title": "영업팀 사원 (Staff)",
+    "cell": "+82-10-6540-2282",
+    "work_tel": "+82-31-855-4243",
+    "email": "ms.jung@simpleline.co.kr",
+    "url": "http://www.simpleline.co.kr",
+    "adr": "경기도 양주시 광적면 광적로 368-14"
+  }
+}
