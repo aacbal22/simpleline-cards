@@ -14,6 +14,13 @@ import json, sys, os, glob, argparse, html
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
+# 직원 셀프 업로드 사진 서빙 Worker (사진만 동적, 명함 본체는 GitHub Pages 유지)
+PHOTO_WORKER = "https://simpleline-card-photos.jh-kim-28b.workers.dev"
+# 사진 로드 폴백: Worker사진 실패 → 정적 assets 사진 → 둘 다 없으면 숨김
+_AVATAR_ONERR = ("this.onerror=null;var s=this.dataset.static;"
+                 "if(s){this.src=s;this.onerror=function(){this.style.display='none'};}"
+                 "else{this.style.display='none';}")
+
 
 def esc(s):
     return html.escape(str(s), quote=True)
@@ -59,8 +66,11 @@ def render_html(data, base_url):
             out.append(f'<a href="tel:{esc(tel)}" class="row"><span class="ico">☎</span>{esc(p)}</a>')
         return "\n".join(out)
 
+    # 사진: 셀프업로드(Worker) 우선, 폴백으로 정적 assets 사진(있으면), 둘 다 없으면 숨김
     photo = data.get("photo")
-    avatar_html = f'<img class="avatar" src="../../assets/{esc(photo)}" alt="{esc(f["name"])}">' if photo else ""
+    static_src = f"../../assets/{esc(photo)}" if photo else ""
+    avatar_html = (f'<img class="avatar" src="{PHOTO_WORKER}/photo/{slug}" alt="{esc(f["name"])}" '
+                   f'data-static="{static_src}" onerror="{_AVATAR_ONERR}">')
 
     tagline = f.get("tagline") or data.get("tagline") or ""
     tagline_html = f'<div class="tagline">{esc(tagline)}</div>' if tagline else ""
@@ -406,7 +416,9 @@ def build_index(base_url):
     )
     cards_html = []
     for it in items:
-        avatar = f'<img class="gava" src="assets/{esc(it["photo"])}" alt="{esc(it["name"])}" loading="lazy">' if it.get("photo") else ""
+        gava_static = f'assets/{esc(it["photo"])}' if it.get("photo") else ""
+        avatar = (f'<img class="gava" src="{PHOTO_WORKER}/photo/{esc(it["slug"])}" alt="{esc(it["name"])}" '
+                  f'data-static="{gava_static}" loading="lazy" onerror="{_AVATAR_ONERR}">')
         search_key = f"{it['name']} {it['title']} {it['dept']}".strip()
         cards_html.append(f"""
       <div class="card" data-key="{esc(search_key)}" data-dept="{esc(it['dept'])}">

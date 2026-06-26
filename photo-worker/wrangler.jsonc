@@ -1,0 +1,12 @@
+{
+  // 직원 디지털명함 "프로필 사진 셀프 업로드" 백엔드 (거래처 명함집과 완전 분리)
+  "name": "simpleline-card-photos",
+  "main": "src/index.js",
+  "compatibility_date": "2025-01-01",
+  "kv_namespaces": [
+    { "binding": "CARD_SELF", "id": "04014805e6a44adab2044d037676c2ce" }
+  ],
+  "vars": {
+    "CARD_BASE": "https://aacbal22.github.io/simpleline-cards"
+  }
+}
