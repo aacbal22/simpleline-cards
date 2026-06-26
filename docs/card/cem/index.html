@@ -173,7 +173,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
   document.getElementById('showqr').onclick=function(){ov.classList.add('on')};
   document.getElementById('closeqr').onclick=function(){ov.classList.remove('on')};
   // vCard 다운로드
-  var VCARD="BEGIN:VCARD\nVERSION:3.0\nN:Chae;Eun Mi;;;\nFN:채은미\nORG:(주)심플라인 / SIMPLELINE\nTITLE:영업팀 차장 (Deputy General Manager)\nTEL;TYPE=CELL:+82-10-3404-4231\nTEL;TYPE=WORK,VOICE:+82-31-855-4243\nEMAIL;TYPE=WORK:simpleline7@naver.com\nURL:http://www.simpleline.co.kr\nADR;TYPE=WORK:;;경기도 양주시 광적면 광적로 368-14;;;;\nEND:VCARD";
+  var VCARD="BEGIN:VCARD\nVERSION:3.0\nN:채;은미;;;\nFN:채은미\nORG:(주)심플라인 / SIMPLELINE\nTITLE:영업팀 차장 (Deputy General Manager)\nTEL;TYPE=CELL:+82-10-3404-4231\nTEL;TYPE=WORK,VOICE:+82-31-855-4243\nEMAIL;TYPE=WORK:simpleline7@naver.com\nURL:http://www.simpleline.co.kr\nADR;TYPE=WORK:;;경기도 양주시 광적면 광적로 368-14;;;;\nEND:VCARD";
   document.getElementById('save').onclick=function(){
     var blob=new Blob([VCARD],{type:'text/vcard;charset=utf-8'});
     var a=document.createElement('a');

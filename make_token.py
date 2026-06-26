@@ -39,6 +39,14 @@ def kv_put(key, value):
         os.unlink(tmp)
 
 
+def issue_token(slug, name):
+    """slug 에 대한 새 업로드 토큰을 KV에 저장하고 업로드 링크를 반환."""
+    token = secrets.token_urlsafe(12)
+    kv_put(f"token:{token}", slug)
+    kv_put(f"name:{token}", name)
+    return f"{WORKER}/u/{token}"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("slug", help="직원 약자 (cards/<slug>.json 과 일치)")
@@ -52,11 +60,7 @@ def main():
         data = json.load(f)
     name = data["front"]["name"]
 
-    token = secrets.token_urlsafe(12)
-    kv_put(f"token:{token}", args.slug)
-    kv_put(f"name:{token}", name)
-
-    link = f"{WORKER}/u/{token}"
+    link = issue_token(args.slug, name)
     print("\n" + "=" * 56)
     print(f"  {name} ({args.slug}) 사진 업로드 링크")
     print("=" * 56)

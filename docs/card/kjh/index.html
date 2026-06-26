@@ -173,7 +173,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
   document.getElementById('showqr').onclick=function(){ov.classList.add('on')};
   document.getElementById('closeqr').onclick=function(){ov.classList.remove('on')};
   // vCard 다운로드
-  var VCARD="BEGIN:VCARD\nVERSION:3.0\nN:Kim;Jun Hyoung;;;\nFN:김준형\nORG:(주)심플라인 / SIMPLELINE\nTITLE:영업팀 실장 (Sales Director)\nTEL;TYPE=CELL:+82-10-6258-4792\nTEL;TYPE=WORK,VOICE:+82-31-855-4243\nEMAIL;TYPE=WORK:jh.kim@simpleline.co.kr\nURL:http://www.simpleline.co.kr\nADR;TYPE=WORK:;;서울시 성동구 성수이로22길 61, 5층;;;;\nEND:VCARD";
+  var VCARD="BEGIN:VCARD\nVERSION:3.0\nN:김;준형;;;\nFN:김준형\nORG:(주)심플라인 / SIMPLELINE\nTITLE:영업팀 실장 (Sales Director)\nTEL;TYPE=CELL:+82-10-6258-4792\nTEL;TYPE=WORK,VOICE:+82-31-855-4243\nEMAIL;TYPE=WORK:jh.kim@simpleline.co.kr\nURL:http://www.simpleline.co.kr\nADR;TYPE=WORK:;;서울시 성동구 성수이로22길 61, 5층;;;;\nEND:VCARD";
   document.getElementById('save').onclick=function(){
     var blob=new Blob([VCARD],{type:'text/vcard;charset=utf-8'});
     var a=document.createElement('a');

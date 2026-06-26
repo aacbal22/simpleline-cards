@@ -27,12 +27,29 @@ def esc(s):
 
 
 def build_vcard(v):
-    """vCard 3.0 문자열 생성 (UTF-8). 스캔/저장 시 폰 연락처에 들어감."""
+    """vCard 3.0 문자열 생성 (UTF-8). 스캔/저장 시 폰 연락처에 들어감.
+    연락처 이름은 한글로 저장 — full_name_kr 사용(없을 때만 영문 폴백)."""
+    kr_full = (v.get("full_name_kr") or "").strip()
+    kr_last = (v.get("kr_last") or "").strip()
+    kr_first = (v.get("kr_first") or "").strip()
+    # 한글 성/이름 분리: 명시(kr_last/kr_first) 우선, 없으면 첫 글자=성(단성 가정).
+    # 복성(남궁·황보 등)은 카드 JSON 의 vcard 에 kr_last/kr_first 를 직접 지정.
+    if not (kr_last or kr_first) and kr_full:
+        if len(kr_full) >= 2 and " " not in kr_full:
+            kr_last, kr_first = kr_full[0], kr_full[1:]
+        else:
+            kr_last = kr_full
+    if kr_last or kr_first:
+        n_line = f"N:{kr_last};{kr_first};;;"
+        fn = kr_full or f"{kr_last}{kr_first}"
+    else:
+        n_line = f"N:{v.get('last_name','')};{v.get('first_name','')};;;"
+        fn = (v.get("first_name", "") + " " + v.get("last_name", "")).strip()
     lines = [
         "BEGIN:VCARD",
         "VERSION:3.0",
-        f"N:{v.get('last_name','')};{v.get('first_name','')};;;",
-        f"FN:{v.get('full_name_kr') or (v.get('first_name','')+' '+v.get('last_name','')).strip()}",
+        n_line,
+        f"FN:{fn}",
         f"ORG:{v.get('org','')}",
         f"TITLE:{v.get('title','')}",
     ]
