@@ -79,7 +79,7 @@ def render_html(data, base_url):
 <meta name="description" content="%%FN%% %%TITLE%% — %%COMPANY_KR%% 디지털 명함">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-:root{ --brand:%%BRAND%%; --ink:#1a1a1a; --muted:#6b6b6b; --line:#ececec;
+:root{ color-scheme:light dark; --brand:%%BRAND%%; --ink:#1a1a1a; --muted:#6b6b6b; --line:#ececec;
   --bg:#f1f0ee; --surface:#ffffff; --tab-bg:#e3e1de; --shadow:rgba(0,0,0,.16); }
 @media (prefers-color-scheme:dark){
   :root{ --ink:#ededed; --muted:#a3a3a3; --line:#3a3836;
@@ -106,11 +106,12 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .front .logo{font-size:21px;font-weight:800;color:var(--brand);letter-spacing:-.5px}
 .front .logo small{font-size:13px;font-weight:700;vertical-align:6px;margin-right:2px}
 .front .tagline{position:absolute;left:24px;top:54px;right:120px;font-size:11px;font-style:italic;
-  color:var(--muted);line-height:1.4;letter-spacing:-.2px}
+  color:#6b6b6b;line-height:1.4;letter-spacing:-.2px}
 .front .who{position:absolute;top:24px;right:24px;text-align:right}
-.front .who .nm{font-size:19px;font-weight:800;letter-spacing:-.3px}
-.front .who .nm em{font-size:12px;font-weight:600;font-style:normal;margin-left:4px;color:var(--muted)}
-.front .who .dp{font-size:12px;color:var(--muted);margin-top:1px}
+/* 명함은 항상 밝은 종이 → 글자색은 다크모드와 무관하게 진한 고정색 */
+.front .who .nm{font-size:19px;font-weight:800;letter-spacing:-.3px;color:#111}
+.front .who .nm em{font-size:12px;font-weight:600;font-style:normal;margin-left:4px;color:#6b6b6b}
+.front .who .dp{font-size:12px;color:#6b6b6b;margin-top:1px}
 .front .info{position:absolute;left:24px;right:24px;bottom:18px;text-align:right;font-size:11.5px;line-height:1.55;color:#333}
 .front .info .em{color:var(--brand);font-weight:600}
 /* BACK (EN) */
@@ -396,7 +397,7 @@ def build_index(base_url):
 <title>심플라인 디지털 명함 관리</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-:root{--brand:#B0481F;--ink:#1a1a1a;--muted:#6b6b6b;--line:#ececec}
+:root{color-scheme:light;--brand:#B0481F;--ink:#1a1a1a;--muted:#6b6b6b;--line:#ececec}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:'Pretendard',-apple-system,sans-serif;background:#f1f0ee;color:var(--ink);padding:24px 16px 48px}
 .wrap{max-width:920px;margin:0 auto}
@@ -420,9 +421,9 @@ header p{font-size:13px;color:var(--muted);margin-top:4px}
 .card .qr img{width:148px;height:148px;border:1px solid var(--line);border-radius:8px;display:block}
 .meta{text-align:center}
 .gava{width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15);margin-bottom:4px}
-.meta .nm{font-size:16px;font-weight:800}
-.meta .nm em{font-size:12px;font-weight:600;font-style:normal;color:var(--muted);margin-left:3px}
-.meta .dp{font-size:12px;color:var(--muted);margin-top:1px}
+.meta .nm{font-size:16px;font-weight:800;color:#111}
+.meta .nm em{font-size:12px;font-weight:600;font-style:normal;color:#6b6b6b;margin-left:3px}
+.meta .dp{font-size:12px;color:#6b6b6b;margin-top:1px}
 .acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:100%}
 .b{flex:1;min-width:84px;text-align:center;font-size:12px;font-weight:700;padding:8px 6px;border-radius:9px;
   border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;text-decoration:none}
