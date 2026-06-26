@@ -7,23 +7,34 @@
 <meta name="description" content="김준형 실장 — 심플라인 디지털 명함">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-:root{ --brand:#B0481F; --ink:#1a1a1a; --muted:#6b6b6b; --line:#ececec; }
+:root{ --brand:#B0481F; --ink:#1a1a1a; --muted:#6b6b6b; --line:#ececec;
+  --bg:#f1f0ee; --surface:#ffffff; --tab-bg:#e3e1de; --shadow:rgba(0,0,0,.16); }
+@media (prefers-color-scheme:dark){
+  :root{ --ink:#ededed; --muted:#a3a3a3; --line:#3a3836;
+    --bg:#161514; --surface:#222120; --tab-bg:#2c2b29; --shadow:rgba(0,0,0,.55); }
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:#f1f0ee;color:var(--ink);
+body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--ink);
   display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:18px;gap:14px}
-.avatar{width:156px;height:156px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.18);margin-bottom:2px}
-.tabs{display:flex;gap:6px;background:#e3e1de;padding:4px;border-radius:999px}
+.avatar{width:156px;height:156px;border-radius:50%;object-fit:cover;border:4px solid var(--surface);box-shadow:0 6px 18px var(--shadow);margin-bottom:2px}
+.tabs{display:flex;gap:6px;background:var(--tab-bg);padding:4px;border-radius:999px}
 .tab{border:0;background:transparent;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
   padding:8px 20px;border-radius:999px;cursor:pointer;transition:.18s}
-.tab.active{background:#fff;color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.card{width:100%;max-width:380px;aspect-ratio:1.75/1;border-radius:18px;overflow:hidden;
-  box-shadow:0 12px 34px rgba(0,0,0,.16);position:relative;display:none}
-.card.show{display:block}
+.tab.active{background:var(--surface);color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+/* 명함 3D 플립 */
+.flip{width:100%;max-width:380px;aspect-ratio:1.75/1;perspective:1600px}
+.flip-inner{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.1,.2,1);transform-style:preserve-3d}
+.flip-inner.flipped{transform:rotateY(180deg)}
+.card{position:absolute;inset:0;border-radius:18px;overflow:hidden;
+  box-shadow:0 12px 34px var(--shadow);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.card.back{transform:rotateY(180deg)}
 /* FRONT (KR) */
 .front{background:#fbfaf8;padding:24px 24px 20px}
 .front .logo{font-size:21px;font-weight:800;color:var(--brand);letter-spacing:-.5px}
 .front .logo small{font-size:13px;font-weight:700;vertical-align:6px;margin-right:2px}
+.front .tagline{position:absolute;left:24px;top:54px;right:120px;font-size:11px;font-style:italic;
+  color:var(--muted);line-height:1.4;letter-spacing:-.2px}
 .front .who{position:absolute;top:24px;right:24px;text-align:right}
 .front .who .nm{font-size:19px;font-weight:800;letter-spacing:-.3px}
 .front .who .nm em{font-size:12px;font-weight:600;font-style:normal;margin-left:4px;color:var(--muted)}
@@ -44,18 +55,19 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
   font:inherit;font-size:15px;font-weight:700;padding:14px;cursor:pointer;text-decoration:none}
 .btn-primary{background:var(--brand);color:#fff}
 .btn-row{display:flex;gap:8px}
-.btn-row .btn{flex:1;background:#fff;color:var(--ink);border:1px solid var(--line);font-size:14px}
+.btn-row .btn{flex:1;background:var(--surface);color:var(--ink);border:1px solid var(--line);font-size:14px}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
 .hint{font-size:11px;color:#9a9a9a;text-align:center}
 .row{display:block;color:inherit;text-decoration:none}
 .ico{display:inline-block;width:14px;opacity:.6;margin-right:4px}
-/* QR 보여주기 오버레이 */
+/* QR 보여주기 오버레이 — 스캔 화면은 항상 밝게(다크모드 비의존) */
 .qr-overlay{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;
   align-items:center;justify-content:center;gap:18px;z-index:99;padding:24px}
 .qr-overlay.on{display:flex}
-.qr-overlay img{width:min(78vw,360px);height:auto;border:1px solid var(--line);border-radius:12px}
-.qr-overlay .cap{font-size:15px;font-weight:700;color:var(--ink)}
-.qr-overlay .sub{font-size:13px;color:var(--muted);margin-top:-10px}
-.qr-overlay .close{border:1px solid var(--line);background:#fff;border-radius:12px;
+.qr-overlay img{width:min(78vw,360px);height:auto;border:1px solid #ececec;border-radius:12px}
+.qr-overlay .cap{font-size:15px;font-weight:700;color:#1a1a1a}
+.qr-overlay .sub{font-size:13px;color:#6b6b6b;margin-top:-10px}
+.qr-overlay .close{border:1px solid #ececec;background:#fff;color:#1a1a1a;border-radius:12px;
   font:inherit;font-weight:700;padding:12px 28px;cursor:pointer}
 </style>
 </head>
@@ -66,47 +78,53 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
     <button class="tab" data-side="back">English</button>
   </div>
 
-  <!-- 앞면 (한글) -->
-  <div class="card front show" id="front">
-    <div class="logo"><small>(주)</small>심플라인</div>
-    <div class="who">
-      <div class="nm">김준형<em>실장</em></div>
-      <div class="dp">영업팀</div>
-    </div>
-    <div class="info">
-      <a href="tel:01062584792" class="row"><span class="ico">☎</span>010-6258-4792</a>
+  <div class="flip">
+   <div class="flip-inner" id="flip">
+    <!-- 앞면 (한글) -->
+    <div class="card front" id="front">
+      <div class="logo"><small>(주)</small>심플라인</div>
+      
+      <div class="who">
+        <div class="nm">김준형<em>실장</em></div>
+        <div class="dp">영업팀</div>
+      </div>
+      <div class="info">
+        <a href="tel:01062584792" class="row"><span class="ico">☎</span>010-6258-4792</a>
 <a href="tel:0318554243" class="row"><span class="ico">☎</span>031-855-4243</a>
-      <a href="mailto:jh.kim@simpleline.co.kr" class="row"><span class="ico">✉</span><span class="em">jh.kim@simpleline.co.kr</span></a>
-      <div style="margin-top:4px">경기도 양주시 광적면 광적로 368-14<br>서울시 성동구 성수이로22길 61, 5층</div>
-      <a href="http://www.simpleline.co.kr" class="row" style="color:var(--brand);font-weight:600">www.simpleline.co.kr</a>
+        <a href="mailto:jh.kim@simpleline.co.kr" class="row"><span class="ico">✉</span><span class="em">jh.kim@simpleline.co.kr</span></a>
+        <div style="margin-top:4px">경기도 양주시 광적면 광적로 368-14<br>서울시 성동구 성수이로22길 61, 5층</div>
+        <a href="http://www.simpleline.co.kr" class="row" style="color:var(--brand);font-weight:600">www.simpleline.co.kr</a>
+      </div>
     </div>
-  </div>
 
-  <!-- 뒷면 (영문) -->
-  <div class="card back" id="back">
-    <div class="vbrand"><span>SIMPLELINE.</span></div>
-    <div class="who">
-      <div class="nm">KIM JUN HYOUNG</div>
-      <div class="dp">Sales team_Sales Director</div>
-    </div>
-    <div class="info">
-      <a href="tel:+821062584792" class="row"><span class="ico">☎</span>+82-10-6258-4792</a>
+    <!-- 뒷면 (영문) -->
+    <div class="card back" id="back">
+      <div class="vbrand"><span>SIMPLELINE.</span></div>
+      <div class="who">
+        <div class="nm">KIM JUN HYOUNG</div>
+        <div class="dp">Sales team_Sales Director</div>
+      </div>
+      <div class="info">
+        <a href="tel:+821062584792" class="row"><span class="ico">☎</span>+82-10-6258-4792</a>
 <a href="tel:+82318554243" class="row"><span class="ico">☎</span>+82-31-855-4243</a>
-      <a href="mailto:jh.kim@simpleline.co.kr" class="row" style="color:#fff"><span class="ico" style="opacity:.8">✉</span>jh.kim@simpleline.co.kr</a>
-      <div style="margin-top:4px">368-14, Gwangjeok-ro, Gwangjeok-myeon,<br>Yangju-si, Gyeonggi-do, Republic of Korea</div>
-      <div>www.simpleline.co.kr</div>
+        <a href="mailto:jh.kim@simpleline.co.kr" class="row" style="color:#fff"><span class="ico" style="opacity:.8">✉</span>jh.kim@simpleline.co.kr</a>
+        <div style="margin-top:4px">368-14, Gwangjeok-ro, Gwangjeok-myeon,<br>Yangju-si, Gyeonggi-do, Republic of Korea</div>
+        <div>www.simpleline.co.kr</div>
+      </div>
     </div>
+   </div>
   </div>
 
   <div class="actions">
     <button class="btn btn-primary" id="save">📇 연락처 저장 / Save Contact</button>
-    <button class="btn" id="showqr" style="background:#fff;color:var(--ink);border:1px solid var(--line)">📲 상대에게 내 QR 보여주기</button>
+    <button class="btn btn-ghost" id="share">🔗 명함 링크 공유 / Share</button>
+    <button class="btn btn-ghost" id="showqr">📲 상대에게 내 QR 보여주기</button>
     <div class="btn-row">
       <a class="btn" href="tel:+82-10-6258-4792">☎ 전화</a>
       <a class="btn" href="sms:+82-10-6258-4792">💬 문자</a>
       <a class="btn" href="mailto:jh.kim@simpleline.co.kr">✉ 메일</a>
     </div>
-    <div class="hint">QR 스캔 → 이 명함 · 탭으로 한글/영문 전환</div>
+    <div class="hint">QR 스캔 → 이 명함 · 탭/명함 터치로 한글↔영문 전환</div>
   </div>
 
   <!-- 내 QR 전체화면 (상대가 스캔하도록 보여주기) -->
@@ -118,14 +136,26 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
   </div>
 
 <script>
-  // 탭 전환
-  var tabs=document.querySelectorAll('.tab');
-  tabs.forEach(function(t){t.onclick=function(){
-    tabs.forEach(function(x){x.classList.remove('active')});t.classList.add('active');
-    var s=t.dataset.side;
-    document.getElementById('front').classList.toggle('show',s==='front');
-    document.getElementById('back').classList.toggle('show',s==='back');
-  }});
+  // 탭 / 명함 터치로 앞뒤 3D 플립
+  var tabs=document.querySelectorAll('.tab'),flip=document.getElementById('flip');
+  function setSide(s){
+    tabs.forEach(function(x){x.classList.toggle('active',x.dataset.side===s)});
+    flip.classList.toggle('flipped',s==='back');
+  }
+  tabs.forEach(function(t){t.onclick=function(){setSide(t.dataset.side)}});
+  flip.addEventListener('click',function(e){
+    if(e.target.closest('a,button')) return;   // 링크/버튼 탭은 플립하지 않음
+    setSide(flip.classList.contains('flipped')?'front':'back');
+  });
+  // 명함 링크 공유 (카톡·문자 등) — 미지원 브라우저는 클립보드 복사
+  var PAGE="https://aacbal22.github.io/simpleline-cards/card/kjh/";
+  document.getElementById('share').onclick=function(){
+    if(navigator.share){
+      navigator.share({title:"김준형 · 심플라인",text:"김준형 디지털 명함",url:PAGE}).catch(function(){});
+    }else{
+      navigator.clipboard.writeText(PAGE).then(function(){alert('명함 링크가 복사되었습니다\n'+PAGE)});
+    }
+  };
   // 내 QR 보여주기
   var ov=document.getElementById('qrov');
   document.getElementById('showqr').onclick=function(){ov.classList.add('on')};

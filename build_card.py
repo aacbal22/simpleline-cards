@@ -62,6 +62,9 @@ def render_html(data, base_url):
     photo = data.get("photo")
     avatar_html = f'<img class="avatar" src="../../assets/{esc(photo)}" alt="{esc(f["name"])}">' if photo else ""
 
+    tagline = f.get("tagline") or data.get("tagline") or ""
+    tagline_html = f'<div class="tagline">{esc(tagline)}</div>' if tagline else ""
+
     front_phones = phone_links(f["phones"])
     back_phones = phone_links(b["phones"])
     front_addr = "<br>".join(esc(a) for a in f["addresses"])
@@ -76,23 +79,34 @@ def render_html(data, base_url):
 <meta name="description" content="%%FN%% %%TITLE%% — %%COMPANY_KR%% 디지털 명함">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
-:root{ --brand:%%BRAND%%; --ink:#1a1a1a; --muted:#6b6b6b; --line:#ececec; }
+:root{ --brand:%%BRAND%%; --ink:#1a1a1a; --muted:#6b6b6b; --line:#ececec;
+  --bg:#f1f0ee; --surface:#ffffff; --tab-bg:#e3e1de; --shadow:rgba(0,0,0,.16); }
+@media (prefers-color-scheme:dark){
+  :root{ --ink:#ededed; --muted:#a3a3a3; --line:#3a3836;
+    --bg:#161514; --surface:#222120; --tab-bg:#2c2b29; --shadow:rgba(0,0,0,.55); }
+}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:#f1f0ee;color:var(--ink);
+body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--ink);
   display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:18px;gap:14px}
-.avatar{width:156px;height:156px;border-radius:50%;object-fit:cover;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.18);margin-bottom:2px}
-.tabs{display:flex;gap:6px;background:#e3e1de;padding:4px;border-radius:999px}
+.avatar{width:156px;height:156px;border-radius:50%;object-fit:cover;border:4px solid var(--surface);box-shadow:0 6px 18px var(--shadow);margin-bottom:2px}
+.tabs{display:flex;gap:6px;background:var(--tab-bg);padding:4px;border-radius:999px}
 .tab{border:0;background:transparent;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
   padding:8px 20px;border-radius:999px;cursor:pointer;transition:.18s}
-.tab.active{background:#fff;color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.card{width:100%;max-width:380px;aspect-ratio:1.75/1;border-radius:18px;overflow:hidden;
-  box-shadow:0 12px 34px rgba(0,0,0,.16);position:relative;display:none}
-.card.show{display:block}
+.tab.active{background:var(--surface);color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+/* 명함 3D 플립 */
+.flip{width:100%;max-width:380px;aspect-ratio:1.75/1;perspective:1600px}
+.flip-inner{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.1,.2,1);transform-style:preserve-3d}
+.flip-inner.flipped{transform:rotateY(180deg)}
+.card{position:absolute;inset:0;border-radius:18px;overflow:hidden;
+  box-shadow:0 12px 34px var(--shadow);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.card.back{transform:rotateY(180deg)}
 /* FRONT (KR) */
 .front{background:#fbfaf8;padding:24px 24px 20px}
 .front .logo{font-size:21px;font-weight:800;color:var(--brand);letter-spacing:-.5px}
 .front .logo small{font-size:13px;font-weight:700;vertical-align:6px;margin-right:2px}
+.front .tagline{position:absolute;left:24px;top:54px;right:120px;font-size:11px;font-style:italic;
+  color:var(--muted);line-height:1.4;letter-spacing:-.2px}
 .front .who{position:absolute;top:24px;right:24px;text-align:right}
 .front .who .nm{font-size:19px;font-weight:800;letter-spacing:-.3px}
 .front .who .nm em{font-size:12px;font-weight:600;font-style:normal;margin-left:4px;color:var(--muted)}
@@ -113,18 +127,19 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
   font:inherit;font-size:15px;font-weight:700;padding:14px;cursor:pointer;text-decoration:none}
 .btn-primary{background:var(--brand);color:#fff}
 .btn-row{display:flex;gap:8px}
-.btn-row .btn{flex:1;background:#fff;color:var(--ink);border:1px solid var(--line);font-size:14px}
+.btn-row .btn{flex:1;background:var(--surface);color:var(--ink);border:1px solid var(--line);font-size:14px}
+.btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
 .hint{font-size:11px;color:#9a9a9a;text-align:center}
 .row{display:block;color:inherit;text-decoration:none}
 .ico{display:inline-block;width:14px;opacity:.6;margin-right:4px}
-/* QR 보여주기 오버레이 */
+/* QR 보여주기 오버레이 — 스캔 화면은 항상 밝게(다크모드 비의존) */
 .qr-overlay{position:fixed;inset:0;background:#fff;display:none;flex-direction:column;
   align-items:center;justify-content:center;gap:18px;z-index:99;padding:24px}
 .qr-overlay.on{display:flex}
-.qr-overlay img{width:min(78vw,360px);height:auto;border:1px solid var(--line);border-radius:12px}
-.qr-overlay .cap{font-size:15px;font-weight:700;color:var(--ink)}
-.qr-overlay .sub{font-size:13px;color:var(--muted);margin-top:-10px}
-.qr-overlay .close{border:1px solid var(--line);background:#fff;border-radius:12px;
+.qr-overlay img{width:min(78vw,360px);height:auto;border:1px solid #ececec;border-radius:12px}
+.qr-overlay .cap{font-size:15px;font-weight:700;color:#1a1a1a}
+.qr-overlay .sub{font-size:13px;color:#6b6b6b;margin-top:-10px}
+.qr-overlay .close{border:1px solid #ececec;background:#fff;color:#1a1a1a;border-radius:12px;
   font:inherit;font-weight:700;padding:12px 28px;cursor:pointer}
 </style>
 </head>
@@ -135,45 +150,51 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
     <button class="tab" data-side="back">English</button>
   </div>
 
-  <!-- 앞면 (한글) -->
-  <div class="card front show" id="front">
-    <div class="logo"><small>%%MARK%%</small>%%COMPANY_KR%%</div>
-    <div class="who">
-      <div class="nm">%%F_NAME%%<em>%%F_TITLE%%</em></div>
-      <div class="dp">%%F_DEPT%%</div>
+  <div class="flip">
+   <div class="flip-inner" id="flip">
+    <!-- 앞면 (한글) -->
+    <div class="card front" id="front">
+      <div class="logo"><small>%%MARK%%</small>%%COMPANY_KR%%</div>
+      %%TAGLINE%%
+      <div class="who">
+        <div class="nm">%%F_NAME%%<em>%%F_TITLE%%</em></div>
+        <div class="dp">%%F_DEPT%%</div>
+      </div>
+      <div class="info">
+        %%F_PHONES%%
+        <a href="mailto:%%EMAIL%%" class="row"><span class="ico">✉</span><span class="em">%%EMAIL%%</span></a>
+        <div style="margin-top:4px">%%F_ADDR%%</div>
+        <a href="http://%%WEB%%" class="row" style="color:var(--brand);font-weight:600">%%WEB%%</a>
+      </div>
     </div>
-    <div class="info">
-      %%F_PHONES%%
-      <a href="mailto:%%EMAIL%%" class="row"><span class="ico">✉</span><span class="em">%%EMAIL%%</span></a>
-      <div style="margin-top:4px">%%F_ADDR%%</div>
-      <a href="http://%%WEB%%" class="row" style="color:var(--brand);font-weight:600">%%WEB%%</a>
-    </div>
-  </div>
 
-  <!-- 뒷면 (영문) -->
-  <div class="card back" id="back">
-    <div class="vbrand"><span>%%COMPANY_EN%%</span></div>
-    <div class="who">
-      <div class="nm">%%B_NAME%%</div>
-      <div class="dp">%%B_TITLE%%</div>
+    <!-- 뒷면 (영문) -->
+    <div class="card back" id="back">
+      <div class="vbrand"><span>%%COMPANY_EN%%</span></div>
+      <div class="who">
+        <div class="nm">%%B_NAME%%</div>
+        <div class="dp">%%B_TITLE%%</div>
+      </div>
+      <div class="info">
+        %%B_PHONES%%
+        <a href="mailto:%%EMAIL%%" class="row" style="color:#fff"><span class="ico" style="opacity:.8">✉</span>%%EMAIL%%</a>
+        <div style="margin-top:4px">%%B_ADDR%%</div>
+        <div>%%WEB%%</div>
+      </div>
     </div>
-    <div class="info">
-      %%B_PHONES%%
-      <a href="mailto:%%EMAIL%%" class="row" style="color:#fff"><span class="ico" style="opacity:.8">✉</span>%%EMAIL%%</a>
-      <div style="margin-top:4px">%%B_ADDR%%</div>
-      <div>%%WEB%%</div>
-    </div>
+   </div>
   </div>
 
   <div class="actions">
     <button class="btn btn-primary" id="save">📇 연락처 저장 / Save Contact</button>
-    <button class="btn" id="showqr" style="background:#fff;color:var(--ink);border:1px solid var(--line)">📲 상대에게 내 QR 보여주기</button>
+    <button class="btn btn-ghost" id="share">🔗 명함 링크 공유 / Share</button>
+    <button class="btn btn-ghost" id="showqr">📲 상대에게 내 QR 보여주기</button>
     <div class="btn-row">
       <a class="btn" href="tel:%%CELL%%">☎ 전화</a>
       <a class="btn" href="sms:%%CELL%%">💬 문자</a>
       <a class="btn" href="mailto:%%EMAIL%%">✉ 메일</a>
     </div>
-    <div class="hint">QR 스캔 → 이 명함 · 탭으로 한글/영문 전환</div>
+    <div class="hint">QR 스캔 → 이 명함 · 탭/명함 터치로 한글↔영문 전환</div>
   </div>
 
   <!-- 내 QR 전체화면 (상대가 스캔하도록 보여주기) -->
@@ -185,14 +206,26 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
   </div>
 
 <script>
-  // 탭 전환
-  var tabs=document.querySelectorAll('.tab');
-  tabs.forEach(function(t){t.onclick=function(){
-    tabs.forEach(function(x){x.classList.remove('active')});t.classList.add('active');
-    var s=t.dataset.side;
-    document.getElementById('front').classList.toggle('show',s==='front');
-    document.getElementById('back').classList.toggle('show',s==='back');
-  }});
+  // 탭 / 명함 터치로 앞뒤 3D 플립
+  var tabs=document.querySelectorAll('.tab'),flip=document.getElementById('flip');
+  function setSide(s){
+    tabs.forEach(function(x){x.classList.toggle('active',x.dataset.side===s)});
+    flip.classList.toggle('flipped',s==='back');
+  }
+  tabs.forEach(function(t){t.onclick=function(){setSide(t.dataset.side)}});
+  flip.addEventListener('click',function(e){
+    if(e.target.closest('a,button')) return;   // 링크/버튼 탭은 플립하지 않음
+    setSide(flip.classList.contains('flipped')?'front':'back');
+  });
+  // 명함 링크 공유 (카톡·문자 등) — 미지원 브라우저는 클립보드 복사
+  var PAGE="%%PAGE_URL%%";
+  document.getElementById('share').onclick=function(){
+    if(navigator.share){
+      navigator.share({title:"%%FN%% · %%COMPANY_KR%%",text:"%%FN%% 디지털 명함",url:PAGE}).catch(function(){});
+    }else{
+      navigator.clipboard.writeText(PAGE).then(function(){alert('명함 링크가 복사되었습니다\n'+PAGE)});
+    }
+  };
   // 내 QR 보여주기
   var ov=document.getElementById('qrov');
   document.getElementById('showqr').onclick=function(){ov.classList.add('on')};
@@ -231,6 +264,8 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
         "%%VCARD_JS%%": vcard_js,
         "%%SLUG%%": slug,
         "%%AVATAR%%": avatar_html,
+        "%%TAGLINE%%": tagline_html,
+        "%%PAGE_URL%%": page_url,
     }
     out = tpl
     for k, val in repl.items():
@@ -329,11 +364,16 @@ def build_index(base_url):
             "company": (dd.get("company_mark", "") + dd.get("company_kr", "")).strip(),
             "url": f"{base_url}/card/{dd['slug']}/",
         })
+    depts = sorted({it["dept"] for it in items if it.get("dept")})
+    dept_chips = "".join(
+        f'<button class="chip" data-dept="{esc(dp)}">{esc(dp)}</button>' for dp in depts
+    )
     cards_html = []
     for it in items:
         avatar = f'<img class="gava" src="assets/{esc(it["photo"])}" alt="{esc(it["name"])}" loading="lazy">' if it.get("photo") else ""
+        search_key = f"{it['name']} {it['title']} {it['dept']}".strip()
         cards_html.append(f"""
-      <div class="card">
+      <div class="card" data-key="{esc(search_key)}" data-dept="{esc(it['dept'])}">
         <a class="qr" href="card/{esc(it['slug'])}/" title="명함 열기">
           <img src="qr/{esc(it['slug'])}.png" alt="{esc(it['name'])} QR" loading="lazy">
         </a>
@@ -364,6 +404,16 @@ header{border-top:4px solid var(--brand);padding:18px 0 16px}
 header h1{font-size:21px;font-weight:800;letter-spacing:-.3px}
 header p{font-size:13px;color:var(--muted);margin-top:4px}
 .count{font-size:12px;color:var(--brand);font-weight:700;margin-top:8px}
+.controls{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.search{width:100%;font:inherit;font-size:14px;padding:11px 14px;border:1px solid var(--line);
+  border-radius:11px;background:#fff;color:var(--ink);outline:none}
+.search:focus{border-color:var(--brand)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:999px;
+  border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;transition:.15s}
+.chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.empty{text-align:center;color:var(--muted);font-size:14px;padding:40px 0;display:none}
+.card.hide{display:none}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:18px}
 .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.04)}
 .card .qr{display:block}
@@ -388,10 +438,18 @@ footer{text-align:center;font-size:11px;color:#9a9a9a;margin-top:28px}
     <header>
       <h1>심플라인 디지털 명함 관리</h1>
       <p>명함을 누르면 페이지가 열립니다 · QR/링크/공유이미지를 한곳에서 관리</p>
-      <div class="count">총 %%COUNT%%명</div>
+      <div class="count" id="count">총 %%COUNT%%명</div>
+      <div class="controls">
+        <input class="search" id="search" type="search" placeholder="🔍 이름·직함·부서 검색" autocomplete="off">
+        <div class="chips" id="chips">
+          <button class="chip active" data-dept="">전체</button>
+          %%DEPTCHIPS%%
+        </div>
+      </div>
     </header>
     <div class="grid">%%CARDS%%
     </div>
+    <div class="empty" id="empty">검색 결과가 없습니다</div>
     <footer>SIMPLELINE · GitHub Pages 호스팅 (PC 꺼져도 항상 열림)</footer>
   </div>
   <div class="toast" id="toast">링크가 복사되었습니다</div>
@@ -403,11 +461,37 @@ footer{text-align:center;font-size:11px;color:#9a9a9a;margin-top:28px}
       setTimeout(function(){t.classList.remove('on')},1500);
     });
   }
+  // 검색 + 부서 필터
+  var search=document.getElementById('search'),
+      chips=document.querySelectorAll('.chip'),
+      cards=document.querySelectorAll('.grid .card'),
+      countEl=document.getElementById('count'),
+      emptyEl=document.getElementById('empty'),
+      curDept='';
+  function apply(){
+    var q=(search.value||'').trim().toLowerCase(),shown=0;
+    cards.forEach(function(c){
+      var okQ=!q||(c.dataset.key||'').toLowerCase().indexOf(q)>=0;
+      var okD=!curDept||c.dataset.dept===curDept;
+      var show=okQ&&okD;
+      c.classList.toggle('hide',!show);
+      if(show)shown++;
+    });
+    countEl.textContent='총 '+shown+'명';
+    emptyEl.style.display=shown?'none':'block';
+  }
+  search.addEventListener('input',apply);
+  chips.forEach(function(ch){ch.onclick=function(){
+    chips.forEach(function(x){x.classList.remove('active')});ch.classList.add('active');
+    curDept=ch.dataset.dept;apply();
+  }});
 </script>
 </body>
 </html>
 """
-    page = page.replace("%%COUNT%%", str(len(items))).replace("%%CARDS%%", "".join(cards_html))
+    page = (page.replace("%%COUNT%%", str(len(items)))
+                .replace("%%DEPTCHIPS%%", dept_chips)
+                .replace("%%CARDS%%", "".join(cards_html)))
     with open(os.path.join(ROOT, "docs", "index.html"), "w", encoding="utf-8") as fp:
         fp.write(page)
     print(f"[INDEX] docs/index.html ({len(items)}명)  →  {base_url}/")
