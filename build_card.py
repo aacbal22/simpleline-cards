@@ -16,7 +16,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # 직원 셀프 업로드 사진 서빙 Worker (사진만 동적, 명함 본체는 GitHub Pages 유지)
 PHOTO_WORKER = "https://simpleline-card-photos.jh-kim-28b.workers.dev"
-VERSION = "V1.2.1"
+VERSION = "V1.2.2"
 # 사진 로드 폴백: Worker사진 실패 → 정적 assets 사진 → 둘 다 없으면 숨김
 _AVATAR_ONERR = ("this.onerror=null;var s=this.dataset.static;"
                  "if(s){this.src=s;this.onerror=function(){this.style.display='none'};}"
@@ -114,6 +114,12 @@ def render_html(data, base_url):
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>%%FN%% · %%COMPANY_KR%% 디지털 명함</title>
 <meta name="description" content="%%FN%% %%TITLE%% — %%COMPANY_KR%% 디지털 명함">
+<!-- 카톡 등 링크 미리보기(Open Graph). 공유 시 이름·직함·사진 노출 -->
+<meta property="og:type" content="profile">
+<meta property="og:title" content="%%FN%% %%TITLE%% · %%COMPANY_KR%%">
+<meta property="og:description" content="%%COMPANY_KR%% 디지털 명함 — 탭하면 연락처 저장">
+<meta property="og:image" content="%%OG_IMAGE%%">
+<meta property="og:url" content="%%PAGE_URL%%">
 <!-- 항상 최신을 받도록 캐시 최소화 -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -385,10 +391,12 @@ textarea.c-in{resize:vertical;line-height:1.5}
   // 명함 링크 공유 (카톡·문자 등) — 미지원 브라우저는 클립보드 복사
   var PAGE="%%PAGE_URL%%";
   document.getElementById('share').onclick=function(){
+    // 공유 시 매번 고유 파라미터 → 카톡이 미리보기를 새로 생성(옛 사진 썸네일 캐시 우회). 카드는 파라미터 무시
+    var SHARE=PAGE+(PAGE.indexOf('?')<0?'?':'&')+'s='+Date.now();
     if(navigator.share){
-      navigator.share({title:"%%FN%% · %%COMPANY_KR%%",text:"%%FN%% 디지털 명함",url:PAGE}).catch(function(){});
+      navigator.share({title:"%%FN%% · %%COMPANY_KR%%",text:"%%FN%% 디지털 명함",url:SHARE}).catch(function(){});
     }else{
-      navigator.clipboard.writeText(PAGE).then(function(){alert('명함 링크가 복사되었습니다\n'+PAGE)});
+      navigator.clipboard.writeText(SHARE).then(function(){alert('명함 링크가 복사되었습니다\n'+SHARE)});
     }
   };
   // 내 QR 보여주기
@@ -613,7 +621,12 @@ textarea.c-in{resize:vertical;line-height:1.5}
         "vadr": vc.get("adr", ""),
     }
 
+    # 링크 미리보기(og:image): 명함형 공유이미지(_share: 이름·직함·QR, 사진 없음) → 명함처럼 보이고 절대 stale 안 됨
+    # (실제 프로필 사진은 링크를 눌러 카드를 열면 항상 최신으로 보임)
+    og_image = f"{base_url}/qr/{slug}_share.png"
+
     repl = {
+        "%%OG_IMAGE%%": esc(og_image),
         "%%CONTACT_BASE%%": json.dumps(contact_base, ensure_ascii=False),
         "%%VCARD_HEAD%%": json.dumps(vcard_head_lines(vc), ensure_ascii=False),
         "%%VCARD_URL%%": esc(vc.get("url", "")),

@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>김주희 · 심플라인 디지털 명함</title>
 <meta name="description" content="김주희 부장 — 심플라인 디지털 명함">
+<!-- 카톡 등 링크 미리보기(Open Graph). 공유 시 이름·직함·사진 노출 -->
+<meta property="og:type" content="profile">
+<meta property="og:title" content="김주희 부장 · 심플라인">
+<meta property="og:description" content="심플라인 디지털 명함 — 탭하면 연락처 저장">
+<meta property="og:image" content="https://aacbal22.github.io/simpleline-cards/qr/kju_share.png">
+<meta property="og:url" content="https://aacbal22.github.io/simpleline-cards/card/kju/">
 <!-- 항상 최신을 받도록 캐시 최소화 -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -278,10 +284,12 @@ textarea.c-in{resize:vertical;line-height:1.5}
   // 명함 링크 공유 (카톡·문자 등) — 미지원 브라우저는 클립보드 복사
   var PAGE="https://aacbal22.github.io/simpleline-cards/card/kju/";
   document.getElementById('share').onclick=function(){
+    // 공유 시 매번 고유 파라미터 → 카톡이 미리보기를 새로 생성(옛 사진 썸네일 캐시 우회). 카드는 파라미터 무시
+    var SHARE=PAGE+(PAGE.indexOf('?')<0?'?':'&')+'s='+Date.now();
     if(navigator.share){
-      navigator.share({title:"김주희 · 심플라인",text:"김주희 디지털 명함",url:PAGE}).catch(function(){});
+      navigator.share({title:"김주희 · 심플라인",text:"김주희 디지털 명함",url:SHARE}).catch(function(){});
     }else{
-      navigator.clipboard.writeText(PAGE).then(function(){alert('명함 링크가 복사되었습니다\n'+PAGE)});
+      navigator.clipboard.writeText(SHARE).then(function(){alert('명함 링크가 복사되었습니다\n'+SHARE)});
     }
   };
   // 내 QR 보여주기
