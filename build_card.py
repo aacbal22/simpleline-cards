@@ -136,8 +136,8 @@ def render_html(data, base_url):
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow-x:clip;max-width:100%}
 body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--ink);
-  display:flex;flex-direction:column;align-items:center;justify-content:safe center;min-height:100dvh;padding:18px;gap:14px}
-.avatar-btn{position:relative;width:156px;height:156px;flex:0 0 auto;aspect-ratio:1/1;border-radius:50%;border:4px solid var(--surface);padding:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:safe center;min-height:100dvh;padding:12px 18px;gap:10px}
+.avatar-btn{position:relative;width:130px;height:130px;flex:0 0 auto;aspect-ratio:1/1;border-radius:50%;border:4px solid var(--surface);padding:0;
   background:#e3e1de;cursor:pointer;margin-bottom:2px;box-shadow:0 6px 18px var(--shadow);overflow:hidden;display:block}
 .avatar{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
 .avatar-empty{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;color:#9a9a9a;font-size:32px;font-weight:300}
@@ -160,7 +160,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .card.front{position:relative;inset:auto;min-height:190px}
 .card.front,.card.back{display:flex;flex-direction:column;justify-content:space-between;gap:20px}
 /* FRONT (KR) */
-.front{background:#fbfaf8;padding:24px 24px 20px}
+.front{background:#fbfaf8;padding:18px 22px 16px}
 .front .fhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;min-width:0}
 .front .fhead .who{min-width:0}
 .front .logo{font-size:21px;font-weight:800;color:var(--brand);letter-spacing:-.5px;white-space:nowrap}
@@ -176,7 +176,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .front .info .em{color:var(--brand);font-weight:600}
 .info .addr{margin-top:5px}
 /* BACK (EN) */
-.back{background:var(--brand);color:#fff;padding:24px}
+.back{background:var(--brand);color:#fff;padding:18px 22px}
 .back .vbrand{position:absolute;left:20px;top:0;bottom:0;display:flex;align-items:center}
 .back .vbrand span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:17px;font-weight:800;letter-spacing:1px}
 .back .who{text-align:right}
@@ -184,9 +184,9 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .back .who .dp{font-size:12px;opacity:.92;margin-top:2px}
 .back .info{text-align:right;font-size:11px;line-height:1.6;opacity:.95}
 /* actions */
-.actions{display:flex;flex-direction:column;gap:8px;width:100%;max-width:380px;flex:0 0 auto}
+.actions{display:flex;flex-direction:column;gap:7px;width:100%;max-width:380px;flex:0 0 auto}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;
-  font:inherit;font-size:15px;font-weight:700;padding:14px;cursor:pointer;text-decoration:none}
+  font:inherit;font-size:15px;font-weight:700;padding:12px;cursor:pointer;text-decoration:none}
 .btn-primary{background:var(--brand);color:#fff}
 .btn-row{display:flex;gap:8px}
 .btn-row .btn{flex:1;background:var(--surface);color:var(--ink);border:1px solid var(--line);font-size:14px}
