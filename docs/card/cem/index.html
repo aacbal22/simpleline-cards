@@ -25,7 +25,7 @@
     --bg:#161514; --surface:#222120; --tab-bg:#2c2b29; --shadow:rgba(0,0,0,.55); }
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+html,body{height:100%;overflow-x:clip;max-width:100%}
 body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--ink);
   display:flex;flex-direction:column;align-items:center;justify-content:safe center;min-height:100dvh;padding:18px;gap:14px}
 .avatar-btn{position:relative;width:156px;height:156px;flex:0 0 auto;aspect-ratio:1/1;border-radius:50%;border:4px solid var(--surface);padding:0;
@@ -45,19 +45,24 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .card{position:absolute;inset:0;border-radius:18px;overflow:hidden;
   box-shadow:0 12px 34px var(--shadow);backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .card.back{transform:rotateY(180deg)}
+/* 명함 공통: 절대배치 대신 세로 flex로 상단(이름)·하단(연락처) 분배 → 브라우저 무관 동일 렌더 */
+.card.front,.card.back{display:flex;flex-direction:column;justify-content:space-between}
 /* FRONT (KR) */
 .front{background:#fbfaf8;padding:24px 24px 20px}
-.front .logo{font-size:21px;font-weight:800;color:var(--brand);letter-spacing:-.5px}
+.front .fhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;min-width:0}
+.front .fhead .who{min-width:0}
+.front .logo{font-size:21px;font-weight:800;color:var(--brand);letter-spacing:-.5px;white-space:nowrap}
 .front .logo small{font-size:13px;font-weight:700;vertical-align:6px;margin-right:2px}
 .front .tagline{position:absolute;left:24px;top:54px;right:120px;font-size:11px;font-style:italic;
   color:#6b6b6b;line-height:1.4;letter-spacing:-.2px}
-.front .who{position:absolute;top:24px;right:24px;text-align:right}
+.front .who{text-align:right}
 /* 명함은 항상 밝은 종이 → 글자색은 다크모드와 무관하게 진한 고정색 */
 .front .who .nm{font-size:19px;font-weight:800;letter-spacing:-.3px;color:#111}
 .front .who .nm em{font-size:12px;font-weight:600;font-style:normal;margin-left:4px;color:#6b6b6b}
 .front .who .dp{font-size:12px;color:#6b6b6b;margin-top:1px}
-.front .info{position:absolute;left:24px;right:24px;bottom:18px;text-align:right;font-size:11.5px;line-height:1.55;color:#333}
+.front .info{text-align:right;font-size:11.5px;line-height:1.6;color:#333}
 .front .info .em{color:var(--brand);font-weight:600}
+.info .addr{margin-top:5px}
 /* BACK (EN) */
 .back{background:var(--brand);color:#fff;padding:24px}
 .back .vbrand{position:absolute;left:20px;top:0;bottom:0;display:flex;align-items:center}
@@ -65,7 +70,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .back .who{text-align:right}
 .back .who .nm{font-size:18px;font-weight:800;letter-spacing:.5px}
 .back .who .dp{font-size:12px;opacity:.92;margin-top:2px}
-.back .info{position:absolute;right:24px;bottom:18px;text-align:right;font-size:11px;line-height:1.55;opacity:.95}
+.back .info{text-align:right;font-size:11px;line-height:1.6;opacity:.95}
 /* actions */
 .actions{display:flex;flex-direction:column;gap:8px;width:100%;max-width:380px;flex:0 0 auto}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;
@@ -125,17 +130,19 @@ textarea.c-in{resize:vertical;line-height:1.5}
    <div class="flip-inner" id="flip">
     <!-- 앞면 (한글) -->
     <div class="card front" id="front">
-      <div class="logo"><small>(주)</small>심플라인</div>
-      
-      <div class="who">
-        <div class="nm">채은미<em>차장</em></div>
-        <div class="dp">영업팀</div>
+      <div class="fhead">
+        <div class="logo"><small>(주)</small>심플라인</div>
+        <div class="who">
+          <div class="nm">채은미<em>차장</em></div>
+          <div class="dp">영업팀</div>
+        </div>
       </div>
+      
       <div class="info">
         <div id="fPhones" style="display:contents"><a href="tel:01034044231" class="row"><span class="ico">☎</span>010-3404-4231</a>
 <a href="tel:0318554243" class="row"><span class="ico">☎</span>031-855-4243</a></div>
         <a href="mailto:simpleline7@naver.com" class="row" id="fEmail"><span class="ico">✉</span><span class="em">simpleline7@naver.com</span></a>
-        <div id="fAddr" style="margin-top:4px">경기도 양주시 광적면 광적로 368-14<br>서울시 성동구 성수이로22길 61, 5층</div>
+        <div id="fAddr" class="addr">경기도 양주시 광적면 광적로 368-14<br>서울시 성동구 성수이로22길 61, 5층</div>
         <a href="http://www.simpleline.co.kr" class="row" style="color:var(--brand);font-weight:600">www.simpleline.co.kr</a>
       </div>
     </div>
@@ -151,7 +158,7 @@ textarea.c-in{resize:vertical;line-height:1.5}
         <div id="bPhones" style="display:contents"><a href="tel:+821034044231" class="row"><span class="ico">☎</span>+82-10-3404-4231</a>
 <a href="tel:+82318554243" class="row"><span class="ico">☎</span>+82-31-855-4243</a></div>
         <a href="mailto:simpleline7@naver.com" class="row" id="bEmail" style="color:#fff"><span class="ico" style="opacity:.8">✉</span>simpleline7@naver.com</a>
-        <div id="bAddr" style="margin-top:4px">368-14, Gwangjeok-ro, Gwangjeok-myeon,<br>Yangju-si, Gyeonggi-do, Republic of Korea</div>
+        <div id="bAddr" class="addr">368-14, Gwangjeok-ro, Gwangjeok-myeon,<br>Yangju-si, Gyeonggi-do, Republic of Korea</div>
         <div>www.simpleline.co.kr</div>
       </div>
     </div>
