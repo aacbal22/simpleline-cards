@@ -16,7 +16,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # 직원 셀프 업로드 사진 서빙 Worker (사진만 동적, 명함 본체는 GitHub Pages 유지)
 PHOTO_WORKER = "https://simpleline-card-photos.jh-kim-28b.workers.dev"
-VERSION = "V1.0.0"
+VERSION = "V1.1.1"
 # 사진 로드 폴백: Worker사진 실패 → 정적 assets 사진 → 둘 다 없으면 숨김
 _AVATAR_ONERR = ("this.onerror=null;var s=this.dataset.static;"
                  "if(s){this.src=s;this.onerror=function(){this.style.display='none'};}"
