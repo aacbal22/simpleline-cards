@@ -27,19 +27,19 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--ink);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:18px;gap:14px}
-.avatar-btn{position:relative;width:156px;height:156px;border-radius:50%;border:4px solid var(--surface);padding:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:safe center;min-height:100dvh;padding:18px;gap:14px}
+.avatar-btn{position:relative;width:156px;height:156px;flex:0 0 auto;aspect-ratio:1/1;border-radius:50%;border:4px solid var(--surface);padding:0;
   background:#e3e1de;cursor:pointer;margin-bottom:2px;box-shadow:0 6px 18px var(--shadow);overflow:hidden;display:block}
 .avatar{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
 .avatar-empty{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;color:#9a9a9a;font-size:32px;font-weight:300}
 .avatar-empty small{font-size:11px;font-weight:600;margin-top:1px}
 .avatar-edit{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);color:#fff;font-size:10.5px;font-weight:700;padding:5px 0;text-align:center;letter-spacing:.3px}
-.tabs{display:flex;gap:6px;background:var(--tab-bg);padding:4px;border-radius:999px}
+.tabs{display:flex;gap:6px;background:var(--tab-bg);padding:4px;border-radius:999px;flex:0 0 auto}
 .tab{border:0;background:transparent;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
   padding:8px 20px;border-radius:999px;cursor:pointer;transition:.18s}
 .tab.active{background:var(--surface);color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 /* 명함 3D 플립 */
-.flip{width:100%;max-width:380px;aspect-ratio:1.75/1;perspective:1600px}
+.flip{width:100%;max-width:380px;aspect-ratio:1.75/1;perspective:1600px;flex:0 0 auto}
 .flip-inner{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.1,.2,1);transform-style:preserve-3d}
 .flip-inner.flipped{transform:rotateY(180deg)}
 .card{position:absolute;inset:0;border-radius:18px;overflow:hidden;
@@ -67,7 +67,7 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .back .who .dp{font-size:12px;opacity:.92;margin-top:2px}
 .back .info{position:absolute;right:24px;bottom:18px;text-align:right;font-size:11px;line-height:1.55;opacity:.95}
 /* actions */
-.actions{display:flex;flex-direction:column;gap:8px;width:100%;max-width:380px}
+.actions{display:flex;flex-direction:column;gap:8px;width:100%;max-width:380px;flex:0 0 auto}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;
   font:inherit;font-size:15px;font-weight:700;padding:14px;cursor:pointer;text-decoration:none}
 .btn-primary{background:var(--brand);color:#fff}
@@ -137,7 +137,6 @@ textarea.c-in{resize:vertical;line-height:1.5}
         <a href="mailto:simpleline7@naver.com" class="row" id="fEmail"><span class="ico">✉</span><span class="em">simpleline7@naver.com</span></a>
         <div id="fAddr" style="margin-top:4px">경기도 양주시 광적면 광적로 368-14<br>서울시 성동구 성수이로22길 61, 5층</div>
         <a href="http://www.simpleline.co.kr" class="row" style="color:var(--brand);font-weight:600">www.simpleline.co.kr</a>
-        <button type="button" id="cEditBtn" style="margin-top:6px;background:none;border:0;padding:0;font:inherit;font-size:12.5px;font-weight:600;color:var(--brand);opacity:.8;cursor:pointer;text-align:left;align-self:flex-start">✎ 내 연락처 수정</button>
       </div>
     </div>
 
@@ -168,6 +167,7 @@ textarea.c-in{resize:vertical;line-height:1.5}
       <a class="btn" id="actSms" href="sms:+82-10-3381-9664">💬 문자</a>
       <a class="btn" id="actMail" href="mailto:simpleline7@naver.com">✉ 메일</a>
     </div>
+    <button type="button" class="btn btn-ghost" id="cEditBtn" style="font-size:13.5px;padding:11px">✎ 내 연락처 수정 (전화·이메일·주소)</button>
     <div class="hint">QR 스캔 → 이 명함 · 탭/명함 터치로 한글↔영문 전환</div>
   </div>
 
