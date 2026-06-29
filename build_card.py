@@ -621,9 +621,9 @@ textarea.c-in{resize:vertical;line-height:1.5}
         "vadr": vc.get("adr", ""),
     }
 
-    # 링크 미리보기(og:image): 명함형 공유이미지(_share: 이름·직함·QR, 사진 없음) → 명함처럼 보이고 절대 stale 안 됨
+    # 링크 미리보기(og:image): 깔끔한 명함형 이미지(_preview: 이름·직함·부서·회사, QR·사진 없음) → 명함답고 절대 stale 없음
     # (실제 프로필 사진은 링크를 눌러 카드를 열면 항상 최신으로 보임)
-    og_image = f"{base_url}/qr/{slug}_share.png"
+    og_image = f"{base_url}/qr/{slug}_preview.png"
 
     repl = {
         "%%OG_IMAGE%%": esc(og_image),
@@ -753,6 +753,52 @@ def make_share(data, page_url, out_path):
 
     # 하단 브랜드 바
     d.rectangle([0, H - 12, W, H], fill=brand)
+
+    canvas.save(out_path)
+
+
+def make_preview(data, out_path):
+    """카톡 등 링크 미리보기용 '명함형' 이미지 (이름·직함·부서·회사, QR·사진 없음 → 깔끔·절대 stale 없음). 1200x630(og 표준)."""
+    from PIL import Image, ImageDraw, ImageFont
+
+    brand = data.get("brand_color", "#B0481F")
+    f = data["front"]
+    name = f["name"]
+    title = f.get("title", "")
+    dept = f.get("dept", "")
+    company = (data.get("company_mark", "") + data.get("company_kr", "")).strip()
+
+    W, H = 1200, 630
+    canvas = Image.new("RGB", (W, H), "white")
+    d = ImageDraw.Draw(canvas)
+
+    FB = "C:/Windows/Fonts/malgunbd.ttf"
+    FR = "C:/Windows/Fonts/malgun.ttf"
+    f_company = ImageFont.truetype(FB, 46)
+    f_name = ImageFont.truetype(FB, 100)
+    f_title = ImageFont.truetype(FB, 48)
+    f_dept = ImageFont.truetype(FR, 42)
+    f_tag = ImageFont.truetype(FR, 34)
+
+    # 왼쪽 브랜드 세로 바 + 하단 바
+    d.rectangle([0, 0, 26, H], fill=brand)
+    d.rectangle([0, H - 14, W, H], fill=brand)
+
+    # 회사명 (브랜드색)
+    d.text((96, 92), company, font=f_company, fill=brand)
+
+    # 이름 + 직함
+    name_y = 210
+    d.text((96, name_y), name, font=f_name, fill="#1a1a1a")
+    nbox = d.textbbox((96, name_y), name, font=f_name)
+    if title:
+        d.text((nbox[2] + 26, name_y + 46), title, font=f_title, fill="#6b6b6b")
+    # 부서
+    if dept:
+        d.text((96, name_y + 140), dept, font=f_dept, fill="#6b6b6b")
+
+    # 하단 태그라인
+    d.text((96, H - 96), "디지털 명함 · 탭하면 연락처 저장", font=f_tag, fill="#9a9a9a")
 
     canvas.save(out_path)
 
@@ -932,11 +978,13 @@ def process(json_path, base_url):
     os.makedirs(qr_dir, exist_ok=True)
     make_qr(page_url, os.path.join(qr_dir, f"{slug}.png"))
     make_share(data, page_url, os.path.join(qr_dir, f"{slug}_share.png"))
+    make_preview(data, os.path.join(qr_dir, f"{slug}_preview.png"))
     print(f"[OK] {slug}")
     print(f"     page  : {page_url}")
     print(f"     html  : docs/card/{slug}/index.html")
     print(f"     qr    : docs/qr/{slug}.png")
     print(f"     share : docs/qr/{slug}_share.png  (카톡 공유용)")
+    print(f"     og    : docs/qr/{slug}_preview.png  (링크 미리보기)")
 
 
 def main():
