@@ -16,7 +16,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # 직원 셀프 업로드 사진 서빙 Worker (사진만 동적, 명함 본체는 GitHub Pages 유지)
 PHOTO_WORKER = "https://simpleline-card-photos.jh-kim-28b.workers.dev"
-VERSION = "V1.2.0"
+VERSION = "V1.2.1"
 # 사진 로드 폴백: Worker사진 실패 → 정적 assets 사진 → 둘 다 없으면 숨김
 _AVATAR_ONERR = ("this.onerror=null;var s=this.dataset.static;"
                  "if(s){this.src=s;this.onerror=function(){this.style.display='none'};}"
@@ -143,6 +143,13 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .avatar-empty{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;color:#9a9a9a;font-size:32px;font-weight:300}
 .avatar-empty small{font-size:11px;font-weight:600;margin-top:1px}
 .avatar-edit{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);color:#fff;font-size:10.5px;font-weight:700;padding:5px 0;text-align:center;letter-spacing:.3px}
+/* 편집 표시(사진 '변경'·'내 연락처 수정')는 기본 숨김 → 소유자 기기(.owner)에서만 노출. 상대방 명함엔 안 보임 */
+.avatar-edit{display:none}
+.avatar-btn{cursor:default}
+#cEditBtn{display:none}
+.owner .avatar-edit{display:block}
+.owner .avatar-btn{cursor:pointer}
+.owner #cEditBtn{display:flex}
 .tabs{display:flex;gap:6px;background:var(--tab-bg);padding:4px;border-radius:999px;flex:0 0 auto}
 .tab{border:0;background:transparent;font:inherit;font-size:14px;font-weight:600;color:var(--muted);
   padding:8px 20px;border-radius:999px;cursor:pointer;transition:.18s}
@@ -354,6 +361,16 @@ textarea.c-in{resize:vertical;line-height:1.5}
   </div>
 
 <script>
+  // 소유자 기기 판별: 편집링크(?t) 또는 ?edit=1 로 한 번 열면 이 기기를 소유자로 기억.
+  // 이후 그 기기에서만 사진'변경'·'내 연락처 수정'이 보임. 상대방(일반 URL)에겐 안 보임.
+  (function(){
+    var p=new URLSearchParams(location.search), k='sl_owner_%%SLUG%%', owner=false;
+    try{
+      if(p.get('t')||p.get('edit')==='1'){ localStorage.setItem(k,'1'); owner=true; }
+      else if(localStorage.getItem(k)==='1'){ owner=true; }
+    }catch(e){ owner=!!(p.get('t')||p.get('edit')==='1'); }
+    if(owner) document.documentElement.classList.add('owner');
+  })();
   // 탭 / 명함 터치로 앞뒤 3D 플립
   var tabs=document.querySelectorAll('.tab'),flip=document.getElementById('flip');
   function setSide(s){
@@ -405,7 +422,7 @@ textarea.c-in{resize:vertical;line-height:1.5}
     var modal=document.getElementById('photoModal');
     var stepPin=document.getElementById('stepPin'), stepCrop=document.getElementById('stepCrop');
     function showStep(s){ stepPin.classList.toggle('on',s==='pin'); stepCrop.classList.toggle('on',s==='crop'); }
-    function openModal(){ modal.classList.add('on'); if(urlToken){ showStep('crop'); } else { showStep('pin'); document.getElementById('pinIn').focus(); } }
+    function openModal(){ if(!document.documentElement.classList.contains('owner')) return; modal.classList.add('on'); if(urlToken){ showStep('crop'); } else { showStep('pin'); document.getElementById('pinIn').focus(); } }
     function closeModal(){ modal.classList.remove('on'); }
     document.getElementById('avatarBtn').onclick=openModal;
     document.getElementById('mClose').onclick=closeModal;
