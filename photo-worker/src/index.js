@@ -24,6 +24,46 @@ export default {
       });
     }
 
+    // 연락처 오버라이드 조회 (명함이 로드 시 fetch → 전화/이메일/주소 덮어쓰기)
+    if (request.method === "GET" && path.startsWith("/contact/")) {
+      const slug = decodeURIComponent(path.slice(9));
+      const raw = await env.CARD_SELF.get(`contact:${slug}`);
+      return new Response(raw || "{}", {
+        headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=20", ...cors() },
+      });
+    }
+
+    // 연락처 셀프 수정 저장 (전화·이메일·한글주소만. 직책·부서·이름은 관리자 전용 → 받지 않음)
+    if (request.method === "POST" && path === "/contact") {
+      const slug = await authSlug(request, env, url);
+      if (!slug) return json({ ok: false, error: "본인 확인 실패 — 휴대폰 뒷 4자리를 확인해 주세요." }, 403);
+      let body;
+      try { body = await request.json(); } catch (e) { return json({ ok: false, error: "형식 오류" }, 400); }
+      const out = {};
+      // 전화: 최대 2개, 각 숫자/하이픈/공백/+ 만, 8~20자
+      if (Array.isArray(body.phones)) {
+        const ph = body.phones.map((p) => String(p || "").trim()).filter(Boolean)
+          .filter((p) => /^[0-9+\-\s]{8,20}$/.test(p)).slice(0, 2);
+        if (ph.length) out.phones = ph;
+      }
+      // 이메일: @ 포함, 100자 이하
+      if (body.email != null) {
+        const em = String(body.email).trim();
+        if (em && em.length <= 100 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) out.email = em;
+        else if (em) return json({ ok: false, error: "이메일 형식을 확인하세요." }, 400);
+      }
+      // 한글 주소: 최대 3줄, 각 120자 이하
+      if (Array.isArray(body.addr)) {
+        const ad = body.addr.map((a) => String(a || "").trim()).filter(Boolean)
+          .map((a) => a.slice(0, 120)).slice(0, 3);
+        if (ad.length) out.addr = ad;
+      }
+      if (!Object.keys(out).length) return json({ ok: false, error: "변경할 내용이 없습니다." }, 400);
+      out._at = "self"; // 출처 표시(동기화 스크립트용)
+      await env.CARD_SELF.put(`contact:${slug}`, JSON.stringify(out));
+      return json({ ok: true, slug, contact: out });
+    }
+
     // 토큰 링크 → 명함 편집모드로 redirect (크롭 UI는 명함 페이지에 통합)
     if (request.method === "GET" && path.startsWith("/u/")) {
       const token = decodeURIComponent(path.slice(3));
@@ -35,18 +75,7 @@ export default {
 
     // 업로드: X-Token 또는 X-Slug+X-Pin 인증
     if (request.method === "POST" && path === "/upload") {
-      const token = request.headers.get("X-Token") || url.searchParams.get("t");
-      let slug = null;
-      if (token) {
-        slug = await env.CARD_SELF.get(`token:${token}`);
-      } else {
-        const s = request.headers.get("X-Slug");
-        const pin = request.headers.get("X-Pin");
-        if (s && pin) {
-          const real = await env.CARD_SELF.get(`pin:${s}`);
-          if (real && String(pin) === String(real)) slug = s;
-        }
-      }
+      const slug = await authSlug(request, env, url);
       if (!slug) return json({ ok: false, error: "본인 확인 실패 — 휴대폰 뒷 4자리를 확인해 주세요." }, 403);
       const buf = await request.arrayBuffer();
       if (!buf || buf.byteLength === 0) return json({ ok: false, error: "이미지가 비어 있습니다." }, 400);
@@ -59,6 +88,19 @@ export default {
     return new Response("not found", { status: 404, headers: cors() });
   },
 };
+
+// 인증: X-Token(편집링크) 또는 X-Slug+X-Pin(휴대폰 뒷4자리) → slug 반환, 실패 시 null
+async function authSlug(request, env, url) {
+  const token = request.headers.get("X-Token") || url.searchParams.get("t");
+  if (token) return await env.CARD_SELF.get(`token:${token}`);
+  const s = request.headers.get("X-Slug");
+  const pin = request.headers.get("X-Pin");
+  if (s && pin) {
+    const real = await env.CARD_SELF.get(`pin:${s}`);
+    if (real && String(pin) === String(real)) return s;
+  }
+  return null;
+}
 
 function cors() {
   return {

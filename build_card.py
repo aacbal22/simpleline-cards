@@ -16,7 +16,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # 직원 셀프 업로드 사진 서빙 Worker (사진만 동적, 명함 본체는 GitHub Pages 유지)
 PHOTO_WORKER = "https://simpleline-card-photos.jh-kim-28b.workers.dev"
-VERSION = "V1.1.1"
+VERSION = "V1.2.0"
 # 사진 로드 폴백: Worker사진 실패 → 정적 assets 사진 → 둘 다 없으면 숨김
 _AVATAR_ONERR = ("this.onerror=null;var s=this.dataset.static;"
                  "if(s){this.src=s;this.onerror=function(){this.style.display='none'};}"
@@ -27,9 +27,10 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
-def build_vcard(v):
-    """vCard 3.0 문자열 생성 (UTF-8). 스캔/저장 시 폰 연락처에 들어감.
-    연락처 이름은 한글로 저장 — full_name_kr 사용(없을 때만 영문 폴백)."""
+def vcard_head_lines(v):
+    """vCard 고정부(BEGIN·VERSION·N·FN·ORG·TITLE) 라인 리스트.
+    연락처 이름은 한글로 저장 — full_name_kr 사용(없을 때만 영문 폴백).
+    직책·부서·이름은 셀프수정 대상이 아니므로 '고정부'로 묶는다."""
     kr_full = (v.get("full_name_kr") or "").strip()
     kr_last = (v.get("kr_last") or "").strip()
     kr_first = (v.get("kr_first") or "").strip()
@@ -46,14 +47,13 @@ def build_vcard(v):
     else:
         n_line = f"N:{v.get('last_name','')};{v.get('first_name','')};;;"
         fn = (v.get("first_name", "") + " " + v.get("last_name", "")).strip()
-    lines = [
-        "BEGIN:VCARD",
-        "VERSION:3.0",
-        n_line,
-        f"FN:{fn}",
-        f"ORG:{v.get('org','')}",
-        f"TITLE:{v.get('title','')}",
-    ]
+    return ["BEGIN:VCARD", "VERSION:3.0", n_line, f"FN:{fn}",
+            f"ORG:{v.get('org','')}", f"TITLE:{v.get('title','')}"]
+
+
+def build_vcard(v):
+    """vCard 3.0 문자열 생성 (UTF-8). 스캔/저장 시 폰 연락처에 들어감."""
+    lines = list(vcard_head_lines(v))
     if v.get("cell"):
         lines.append(f"TEL;TYPE=CELL:{v['cell']}")
     if v.get("work_tel"):
@@ -216,6 +216,11 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
 .m-msg.err{color:#c0392b}.m-msg.ok{color:#1a7a3c}
 .step{display:none}.step.on{display:block}
 input[type=file]{display:none}
+.c-lab{display:block;text-align:left;font-size:12.5px;font-weight:700;color:var(--muted);margin:11px 0 4px}
+.c-in{width:100%;font:inherit;font-size:15px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);outline:none;box-sizing:border-box}
+.c-in:focus{border-color:var(--brand)}
+textarea.c-in{resize:vertical;line-height:1.5}
+.c-note{text-align:left;font-size:11.5px;color:var(--muted);line-height:1.5;margin:10px 0 2px}
 </style>
 </head>
 <body>
@@ -236,10 +241,11 @@ input[type=file]{display:none}
         <div class="dp">%%F_DEPT%%</div>
       </div>
       <div class="info">
-        %%F_PHONES%%
-        <a href="mailto:%%EMAIL%%" class="row"><span class="ico">✉</span><span class="em">%%EMAIL%%</span></a>
-        <div style="margin-top:4px">%%F_ADDR%%</div>
+        <div id="fPhones" style="display:contents">%%F_PHONES%%</div>
+        <a href="mailto:%%EMAIL%%" class="row" id="fEmail"><span class="ico">✉</span><span class="em">%%EMAIL%%</span></a>
+        <div id="fAddr" style="margin-top:4px">%%F_ADDR%%</div>
         <a href="http://%%WEB%%" class="row" style="color:var(--brand);font-weight:600">%%WEB%%</a>
+        <button type="button" id="cEditBtn" style="margin-top:6px;background:none;border:0;padding:0;font:inherit;font-size:12.5px;font-weight:600;color:var(--brand);opacity:.8;cursor:pointer;text-align:left;align-self:flex-start">✎ 내 연락처 수정</button>
       </div>
     </div>
 
@@ -251,9 +257,9 @@ input[type=file]{display:none}
         <div class="dp">%%B_TITLE%%</div>
       </div>
       <div class="info">
-        %%B_PHONES%%
-        <a href="mailto:%%EMAIL%%" class="row" style="color:#fff"><span class="ico" style="opacity:.8">✉</span>%%EMAIL%%</a>
-        <div style="margin-top:4px">%%B_ADDR%%</div>
+        <div id="bPhones" style="display:contents">%%B_PHONES%%</div>
+        <a href="mailto:%%EMAIL%%" class="row" id="bEmail" style="color:#fff"><span class="ico" style="opacity:.8">✉</span>%%EMAIL%%</a>
+        <div id="bAddr" style="margin-top:4px">%%B_ADDR%%</div>
         <div>%%WEB%%</div>
       </div>
     </div>
@@ -265,9 +271,9 @@ input[type=file]{display:none}
     <button class="btn btn-ghost" id="share">🔗 명함 링크 공유 / Share</button>
     <button class="btn btn-ghost" id="showqr">📲 상대에게 내 QR 보여주기</button>
     <div class="btn-row">
-      <a class="btn" href="tel:%%CELL%%">☎ 전화</a>
-      <a class="btn" href="sms:%%CELL%%">💬 문자</a>
-      <a class="btn" href="mailto:%%EMAIL%%">✉ 메일</a>
+      <a class="btn" id="actCall" href="tel:%%CELL%%">☎ 전화</a>
+      <a class="btn" id="actSms" href="sms:%%CELL%%">💬 문자</a>
+      <a class="btn" id="actMail" href="mailto:%%EMAIL%%">✉ 메일</a>
     </div>
     <div class="hint">QR 스캔 → 이 명함 · 탭/명함 터치로 한글↔영문 전환</div>
   </div>
@@ -302,6 +308,37 @@ input[type=file]{display:none}
         <input type="file" id="fileIn" accept="image/*">
         <button class="m-btn m-primary" id="upBtn" disabled>이 사진으로 등록</button>
         <div class="m-msg" id="cropMsg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 연락처 수정 모달 (전화·이메일·주소만. 직책·부서·이름은 관리자 전용) -->
+  <div class="modal" id="contactModal">
+    <div class="sheet">
+      <button class="m-close" id="cmClose">&times;</button>
+      <!-- 1) 본인 확인 -->
+      <div class="step on" id="cStepPin">
+        <h3>본인 확인</h3>
+        <div class="desc">내 휴대폰 번호 <b>뒷 4자리</b>를 입력하세요.</div>
+        <input class="pin-in" id="cPinIn" type="tel" inputmode="numeric" maxlength="4" placeholder="0000">
+        <div class="m-msg" id="cPinMsg"></div>
+        <button class="m-btn m-primary" id="cPinNext">다음</button>
+      </div>
+      <!-- 2) 연락처 입력 -->
+      <div class="step" id="cStepForm">
+        <h3>연락처 수정</h3>
+        <div class="desc">전화·이메일·주소만 바꿀 수 있어요. 직책·부서·이름 변경은 실장님께 요청하세요.</div>
+        <label class="c-lab">휴대폰</label>
+        <input class="c-in" id="cMobile" type="tel" inputmode="tel" placeholder="010-0000-0000">
+        <label class="c-lab">직통(사무실) 전화 <span style="opacity:.55">— 선택</span></label>
+        <input class="c-in" id="cTel" type="tel" inputmode="tel" placeholder="031-000-0000">
+        <label class="c-lab">이메일</label>
+        <input class="c-in" id="cEmail" type="email" inputmode="email" placeholder="name@simpleline.co.kr">
+        <label class="c-lab">주소(한글) <span style="opacity:.55">— 줄바꿈으로 여러 줄</span></label>
+        <textarea class="c-in" id="cAddr" rows="3" placeholder="경기도 양주시 …"></textarea>
+        <div class="c-note">※ 주소는 회사 공용입니다. 바꾸면 내 명함에만 반영돼요. 영문(뒷면) 주소는 그대로 유지됩니다.</div>
+        <button class="m-btn m-primary" id="cSave">이 내용으로 저장</button>
+        <div class="m-msg" id="cFormMsg"></div>
       </div>
     </div>
   </div>
@@ -437,11 +474,120 @@ input[type=file]{display:none}
       },'image/jpeg',0.9);
     };
   })();
+
+  // ===== 연락처(전화·이메일·주소) 셀프 수정 =====
+  (function(){
+    var SLUG="%%SLUG%%", WORKER="%%WORKER%%";
+    var urlToken=(new URLSearchParams(location.search)).get('t')||'';
+    var cpin='';
+    var BASE=%%CONTACT_BASE%%;
+    var VHEAD=%%VCARD_HEAD%%, VURL="%%VCARD_URL%%";
+    var cur={phones:BASE.phones.slice(),email:BASE.email,faddr:BASE.faddr.slice(),
+             vcell:BASE.vcell,vwork:BASE.vwork,vadr:BASE.vadr};
+
+    function esc(s){return String(s).replace(/[&<>"]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];});}
+    function bare(p){return String(p).replace(/[\s-]/g,'');}
+    function intl(p){var d=String(p).trim();if(d.charAt(0)==='+')return d;d=d.replace(/\s/g,'');if(d.charAt(0)==='0')d=d.slice(1);return '+82-'+d;}
+    function phoneRows(ph,useIntl){return ph.map(function(p){var v=useIntl?intl(p):p;return '<a href="tel:'+bare(v)+'" class="row"><span class="ico">☎</span>'+esc(v)+'</a>';}).join('');}
+    function buildVcard(){
+      var L=VHEAD.slice();
+      if(cur.vcell)L.push('TEL;TYPE=CELL:'+cur.vcell);
+      if(cur.vwork)L.push('TEL;TYPE=WORK,VOICE:'+cur.vwork);
+      if(cur.email)L.push('EMAIL;TYPE=WORK:'+cur.email);
+      if(VURL)L.push('URL:'+VURL);
+      if(cur.vadr)L.push('ADR;TYPE=WORK:;;'+cur.vadr+';;;;');
+      L.push('END:VCARD');return L.join('\r\n');
+    }
+    function setEl(id,fn){var e=document.getElementById(id);if(e)fn(e);}
+    function applyOverride(ov){
+      ov=ov||{};
+      var hasP=ov.phones&&ov.phones.length, hasE=!!ov.email, hasA=ov.addr&&ov.addr.length;
+      cur.phones=hasP?ov.phones:BASE.phones;
+      cur.email =hasE?ov.email:BASE.email;
+      cur.faddr =hasA?ov.addr:BASE.faddr;
+      cur.vcell =hasP?intl(ov.phones[0]):BASE.vcell;
+      cur.vwork =hasP?(ov.phones[1]?intl(ov.phones[1]):''):BASE.vwork;
+      cur.vadr  =hasA?ov.addr.join(' '):BASE.vadr;
+      setEl('fPhones',function(e){e.innerHTML=phoneRows(cur.phones,false);});
+      setEl('bPhones',function(e){e.innerHTML=phoneRows(cur.phones,true);});
+      setEl('fEmail',function(e){e.href='mailto:'+cur.email;e.innerHTML='<span class="ico">✉</span><span class="em">'+esc(cur.email)+'</span>';});
+      setEl('bEmail',function(e){e.href='mailto:'+cur.email;e.innerHTML='<span class="ico" style="opacity:.8">✉</span>'+esc(cur.email);});
+      setEl('fAddr',function(e){e.innerHTML=cur.faddr.map(esc).join('<br>');});
+      setEl('actCall',function(e){if(cur.phones[0])e.href='tel:'+bare(cur.phones[0]);});
+      setEl('actSms',function(e){if(cur.phones[0])e.href='sms:'+bare(cur.phones[0]);});
+      setEl('actMail',function(e){e.href='mailto:'+cur.email;});
+      VCARD=buildVcard();
+    }
+
+    // 로드 시 저장된 셀프수정값 반영 (없으면 기본 유지)
+    fetch(WORKER+'/contact/'+encodeURIComponent(SLUG)).then(function(r){return r.ok?r.json():null;})
+      .then(function(j){ if(j&&(j.phones||j.email||j.addr)) applyOverride(j); }).catch(function(){});
+
+    var modal=document.getElementById('contactModal');
+    var sPin=document.getElementById('cStepPin'), sForm=document.getElementById('cStepForm');
+    function cStep(s){ sPin.classList.toggle('on',s==='pin'); sForm.classList.toggle('on',s==='form'); }
+    function fillForm(){
+      document.getElementById('cMobile').value=cur.phones[0]||'';
+      document.getElementById('cTel').value=cur.phones[1]||'';
+      document.getElementById('cEmail').value=cur.email||'';
+      document.getElementById('cAddr').value=(cur.faddr||[]).join('\n');
+    }
+    function openC(){ modal.classList.add('on'); if(urlToken){ cStep('form'); fillForm(); } else { cStep('pin'); document.getElementById('cPinIn').focus(); } }
+    function closeC(){ modal.classList.remove('on'); }
+    setEl('cEditBtn',function(e){ e.onclick=openC; });
+    document.getElementById('cmClose').onclick=closeC;
+    modal.addEventListener('click',function(e){ if(e.target===modal) closeC(); });
+
+    var cPinIn=document.getElementById('cPinIn'), cPinMsg=document.getElementById('cPinMsg');
+    document.getElementById('cPinNext').onclick=function(){
+      var v=(cPinIn.value||'').trim();
+      if(!/^[0-9]{4}$/.test(v)){ cPinMsg.className='m-msg err'; cPinMsg.textContent='숫자 4자리를 입력하세요.'; return; }
+      cpin=v; cPinMsg.textContent=''; cStep('form'); fillForm();
+    };
+
+    var cMsg=document.getElementById('cFormMsg');
+    document.getElementById('cSave').onclick=function(){
+      var mob=(document.getElementById('cMobile').value||'').trim();
+      var tel=(document.getElementById('cTel').value||'').trim();
+      var em=(document.getElementById('cEmail').value||'').trim();
+      var ad=(document.getElementById('cAddr').value||'').split('\n').map(function(x){return x.trim();}).filter(Boolean);
+      if(!mob){ cMsg.className='m-msg err'; cMsg.textContent='휴대폰 번호를 입력하세요.'; return; }
+      if(!/^[0-9+\-\s]{8,20}$/.test(mob)){ cMsg.className='m-msg err'; cMsg.textContent='휴대폰 번호 형식을 확인하세요.'; return; }
+      if(em && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ cMsg.className='m-msg err'; cMsg.textContent='이메일 형식을 확인하세요.'; return; }
+      var phones=[mob]; if(tel) phones.push(tel);
+      var body={phones:phones, email:em, addr:ad};
+      var headers={'Content-Type':'application/json'};
+      if(urlToken){ headers['X-Token']=urlToken; } else { headers['X-Slug']=SLUG; headers['X-Pin']=cpin; }
+      cMsg.className='m-msg'; cMsg.textContent='저장 중…';
+      fetch(WORKER+'/contact',{method:'POST',headers:headers,body:JSON.stringify(body)})
+        .then(function(r){return r.json();})
+        .then(function(j){
+          if(j.ok){ applyOverride(j.contact||body); cMsg.className='m-msg ok'; cMsg.textContent='✅ 변경됐어요!'; setTimeout(closeC,900); }
+          else { cMsg.className='m-msg err'; cMsg.textContent='⚠ '+(j.error||'실패했어요.');
+                 if(!urlToken){ cStep('pin'); cPinMsg.className='m-msg err'; cPinMsg.textContent='뒷 4자리를 다시 확인하세요.'; } }
+        })
+        .catch(function(){ cMsg.className='m-msg err'; cMsg.textContent='⚠ 네트워크 오류. 다시 시도하세요.'; });
+    };
+  })();
 </script>
 </body>
 </html>
 """
+    # 연락처 셀프수정 모듈용 데이터: 표시 기본값 + vCard 고정부/편집부 분리
+    vc = data["vcard"]
+    contact_base = {
+        "phones": f["phones"],        # 앞면(한글) 전화 — 셀프수정 기준
+        "email": f["email"],
+        "faddr": f["addresses"],      # 앞면(한글) 주소
+        "vcell": vc.get("cell", ""),  # vCard 저장용(국제표기)
+        "vwork": vc.get("work_tel", ""),
+        "vadr": vc.get("adr", ""),
+    }
+
     repl = {
+        "%%CONTACT_BASE%%": json.dumps(contact_base, ensure_ascii=False),
+        "%%VCARD_HEAD%%": json.dumps(vcard_head_lines(vc), ensure_ascii=False),
+        "%%VCARD_URL%%": esc(vc.get("url", "")),
         "%%FN%%": esc(data["vcard"].get("full_name_kr", f["name"])),
         "%%BRAND%%": brand,
         "%%MARK%%": esc(data.get("company_mark", "")),
