@@ -20,7 +20,8 @@ export default {
       const data = await env.CARD_SELF.get(`photo:${slug}`, "arrayBuffer");
       if (!data) return new Response("no photo", { status: 404, headers: cors() });
       return new Response(data, {
-        headers: { "Content-Type": "image/jpeg", "Cache-Control": "public, max-age=30", ...cors() },
+        // 사진 바꾸면 상대방도 새로고침 시 즉시 최신 보이게 — 캐시 금지(아바타는 작아 부담 적음)
+        headers: { "Content-Type": "image/jpeg", "Cache-Control": "no-cache, no-store, must-revalidate", ...cors() },
       });
     }
 

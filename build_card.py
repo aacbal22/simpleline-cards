@@ -418,6 +418,8 @@ textarea.c-in{resize:vertical;line-height:1.5}
       if(s && img.src.indexOf(s)<0){ img.src=s; return; }
       img.style.display='none'; empty.style.display='flex';
     });
+    // 항상 최신 사진: 열 때마다 캐시 우회(?t)로 재요청 → 사진 바꾸면 상대방도 즉시 새 사진(카톡 인앱 캐시까지 우회)
+    img.src=WORKER+'/photo/'+SLUG+'?t='+Date.now();
 
     var modal=document.getElementById('photoModal');
     var stepPin=document.getElementById('stepPin'), stepCrop=document.getElementById('stepCrop');
