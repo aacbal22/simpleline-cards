@@ -148,14 +148,17 @@ body{font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;bac
   padding:8px 20px;border-radius:999px;cursor:pointer;transition:.18s}
 .tab.active{background:var(--surface);color:var(--brand);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 /* 명함 3D 플립 */
-.flip{width:100%;max-width:380px;aspect-ratio:1.75/1;perspective:1600px;flex:0 0 auto}
-.flip-inner{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.1,.2,1);transform-style:preserve-3d}
+.flip{width:100%;max-width:380px;perspective:1600px;flex:0 0 auto}
+.flip-inner{position:relative;width:100%;transition:transform .65s cubic-bezier(.4,.1,.2,1);transform-style:preserve-3d}
 .flip-inner.flipped{transform:rotateY(180deg)}
 .card{position:absolute;inset:0;border-radius:18px;overflow:hidden;
   box-shadow:0 12px 34px var(--shadow);backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .card.back{transform:rotateY(180deg)}
-/* 명함 공통: 절대배치 대신 세로 flex로 상단(이름)·하단(연락처) 분배 → 브라우저 무관 동일 렌더 */
-.card.front,.card.back{display:flex;flex-direction:column;justify-content:space-between}
+/* 명함 공통: 절대배치 대신 세로 flex로 상단(이름)·하단(연락처) 분배 → 브라우저 무관 동일 렌더.
+   앞면이 흐름에 있어 높이를 결정(aspect-ratio는 최소 비율). 좁은 화면선 카드가 늘어나 항상 줄간격 확보.
+   뒷면은 절대배치로 앞면 높이에 겹침. */
+.card.front{position:relative;inset:auto;min-height:190px}
+.card.front,.card.back{display:flex;flex-direction:column;justify-content:space-between;gap:20px}
 /* FRONT (KR) */
 .front{background:#fbfaf8;padding:24px 24px 20px}
 .front .fhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;min-width:0}
